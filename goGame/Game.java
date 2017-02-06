@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Scanner;
 
 import Players.Player;
+import communication.Peer.Key;
+import goGame.Board.Status;
 
 public class Game {
 	
@@ -17,6 +19,7 @@ public class Game {
 	public int playerIndex;
 	public static HashSet <String> oldGamePositions;
 	public static int passedBefore = 0;
+	public int counterofstupid = 0;
 	
 	
 	/**
@@ -53,6 +56,28 @@ public class Game {
 		}
 
 	}
+		
+		public boolean passOrPlay(Board b){
+			
+			for(int i = 0; i < Board.DIM; i++){
+				for(int j = 0; j < Board.DIM; j++){
+
+					if(b.isValidMove(i, j)){
+						if(b.isPlacementNoGood(b.getPointAt(i, j))){
+							b.stones.put(b.getPointAt(i,j), Status.NONE);
+							return true;
+						}else{
+							b.stones.put(b.getPointAt(i,j), Status.NONE);
+							return false;
+						}
+					}
+					
+				}
+			}return true;
+		}
+			
+
+	
 	
 	//checks the answer you type at the end of the game
     private boolean rematch() {
