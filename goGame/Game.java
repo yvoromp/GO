@@ -18,7 +18,7 @@ public class Game {
 	public static HashSet <String> oldGamePositions;
 	public static int passedBefore = 0;
 	
-	
+	//hallo man
 	/**
 	 * creates a new game
 	 * @param s0
