@@ -74,7 +74,6 @@ public class Server {
 		
 		//tries to create a socket
 		try{
-			//TODO: when do I have to close the serverSocket? what's the difference with closing the terminal?
 			serverSocket = new ServerSocket(myPort);
 		}catch(IOException e){
 			System.out.println("could not create a socket on port " + myPort);
