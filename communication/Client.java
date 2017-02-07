@@ -75,7 +75,6 @@ public class Client extends Thread{
 	private BufferedReader in;
 	private BufferedWriter out;
 	private Game game;
-	private boolean currentStatus;
 	private boolean connected;
 	private boolean myTurn;
 	/**
@@ -197,7 +196,6 @@ public class Client extends Thread{
 					break;
 
 				case GO:
-					print("check1");
 					client.sendText(input);
 					break;
 				case PASS:
@@ -262,7 +260,6 @@ public void readServerInput(){
 			case VALID:
 				String status = splited[1];
 				if(status.equals(stoneStatus)){
-					currentStatus = false;
 					myTurn = false;
 				}else{
 					print("opponent made a move, your turn!");
@@ -270,8 +267,8 @@ public void readServerInput(){
 					int x = Integer.parseInt(splited[2]);
 					int y = Integer.parseInt(splited[3]);
 					game.board.setStone(game.board.getPointAt(x,y));
-					currentStatus = true;
 					myTurn = true;
+					break;
 				}
 				break;
 			case INVALID:
@@ -309,16 +306,13 @@ public void readServerInput(){
 			case PASSED:
 				String passer= splited[1];
 				if(!passer.equals(stoneStatus)){
-					currentStatus= true;
+					myTurn= true;
 					print("your opponent has passed, your turn!");
 				}else{
 					print("you passed this turn!");
-					currentStatus = false;
+					myTurn = false;
 				}
 			case PLAYER:
-
-
-
 				break;
 			default:
 				break;

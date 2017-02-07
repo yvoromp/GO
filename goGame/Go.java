@@ -1,6 +1,6 @@
 package goGame;
-import java.util.Scanner;
 
+import java.util.Scanner;
 import Players.AI;
 import Players.HumanPlayer;
 import Players.Player;

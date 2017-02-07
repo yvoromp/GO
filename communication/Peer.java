@@ -113,7 +113,6 @@ public class Peer extends Thread{
 	public void run(){
 		String text = "";
 		try{
-			//announce();
 			while((text = in.readLine()) != null){
 				//compare every input with the keywords, and act when one occurs
 				try{
@@ -156,11 +155,6 @@ public class Peer extends Thread{
 						sendCommandText(Key.CHAT + " " + "you are no longer in the waitinglist, to start again type GO statement");
 						break;
 					case MOVE:
-						int x = (int) (Math.floor(Math.random()*(boardSize)));
-						int y = (int) (Math.floor(Math.random()* (boardSize)));
-						sendCommandText(Key.MOVE + " " + x + " " + y);
-						
-						
 						passCounter = 0;
 						int playerIndex = server.getGame(this).getPlayerIndex();
 						Status stoneStatus = (playerIndex == 0) ? Status.BLACK : Status.WHITE;
@@ -205,10 +199,6 @@ public class Peer extends Thread{
 						break;
 
 					case PASS:
-						int x = (int) (Math.floor(Math.random()*(boardSize)));
-						int y = (int) (Math.floor(Math.random()* (boardSize)));
-						sendCommandText(Key.MOVE + " " + x + " " + y);
-						
 						passCounter = (currentStoneStatus == Status.BLACK) ? 1 : 0;
 						if(currentStoneStatus == Status.WHITE && passCounter > 0){
 							server.sendToPairedClients(Key.END + " " + server.getGame(this).board.blackStoneCounter + " " + server.getGame(this).board.whiteStoneCounter, this);
