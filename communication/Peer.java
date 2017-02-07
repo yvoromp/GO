@@ -113,7 +113,6 @@ public class Peer extends Thread{
 	public void run(){
 		String text = "";
 		try{
-			announce();
 			while((text = in.readLine()) != null){
 				//compare every input with the keywords, and act when one occurs
 				try{
@@ -210,6 +209,8 @@ public class Peer extends Thread{
 						if(server.getGame(this).board.blackPassed){
 							server.sendToPairedClients(Key.END + " " + server.getGame(this).board.blackStoneCounter + " " + server.getGame(this).board.whiteStoneCounter, this);
 						}break;
+					case PLAYER:
+						name = splited [1];
 					default:
 						sendCommandText(text);
 						break;

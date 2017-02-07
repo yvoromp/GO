@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Scanner;
 
 import Players.Player;
+import communication.Peer.Key;
+import goGame.Board.Status;
 
 public class Game {
 	
