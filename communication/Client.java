@@ -140,7 +140,7 @@ public class Client extends Thread{
 	 * prints string to system.out
 	 * @param text
 	 */
-	private static void print(String text){
+	public static void print(String text){
 		System.out.println(text);
 	}
 
