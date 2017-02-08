@@ -211,6 +211,7 @@ public class Peer extends Thread{
 						}break;
 					case PLAYER:
 						name = splited [1];
+						server.sendAll(Key.PLAYER + " " + name);
 					default:
 						sendCommandText(text);
 						break;

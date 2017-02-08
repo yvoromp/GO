@@ -240,14 +240,15 @@ public class Server {
 				peer2 = peer;
 			}
 		}
+		
+		
+		peer1.sendCommandText(Key.READY + " " + "black" + " " + peer1.getClientName() + " " + prefBoardSize);
+		peer2.sendCommandText(Key.READY + " " + "white" + " " + peer2.getClientName() + " " + prefBoardSize);
+		addNewGame(game, peer1, peer2);
 		removeFromWaitingList(pairedClients[0]);
 		removeFromWaitingList(pairedClients[1]);
-		
-		peer1.sendCommandText(Key.READY + " " + prefBoardSize + " " + "black" + " " + peer1.getClientName() + " " + "white" + " " + peer2.getClientName());
-		peer2.sendCommandText(Key.READY + " " + prefBoardSize + " " + "white" + " " + peer2.getClientName() + " " + "black" + " " + peer1.getClientName());
-		addNewGame(game, peer1, peer2);
 		sendAll(Key.CHAT + " " +"new game started between " + peer1.getClientName() + " and " + peer2.getClientName());
-		//game.start();
+		game.start();
 
 
 	}

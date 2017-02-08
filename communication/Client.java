@@ -70,13 +70,13 @@ public class Client extends Thread{
 	}
 
 	private String name;
-	private String stoneStatus;
+	public String stoneStatus;
 	private Socket socket;
 	private BufferedReader in;
 	private BufferedWriter out;
 	private Game game;
 	private boolean connected;
-	private boolean myTurn;
+	public boolean myTurn;
 	/**
 	 * creates a new client object
 	 * @param name
@@ -98,7 +98,7 @@ public class Client extends Thread{
 	 * @param status
 	 * @return
 	 */
-	public Status isBlack(String status){
+	public Status stringToStatus(String status){
 		Status thisStatus = status.equals("black") ? Status.BLACK : Status.WHITE;
 		return thisStatus;
 	}
@@ -246,7 +246,7 @@ public void readServerInput(){
 				String status1 = splited[1];
 				myTurn = status1.equals("black");
 				stoneStatus = status1;
-				Status p1 = isBlack(status1);
+				Status p1 = stringToStatus(status1);
 				Status p2 = (p1 == Status.BLACK) ? Status.WHITE : Status.BLACK;
 				new AI(Status.BLACK, new FillBoardStrategy(), Integer.parseInt(splited[3]));
 				Player player1 = new AI(Status.BLACK, new FillBoardStrategy(), Integer.parseInt(splited[3]));
@@ -263,7 +263,7 @@ public void readServerInput(){
 					myTurn = false;
 				}else{
 					print("opponent made a move, your turn!");
-					Status playedStatus = isBlack(status);
+					Status playedStatus = stringToStatus(status);
 					int x = Integer.parseInt(splited[2]);
 					int y = Integer.parseInt(splited[3]);
 					game.board.setStone(game.board.getPointAt(x,y));
