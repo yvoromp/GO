@@ -7,6 +7,8 @@ import java.util.Scanner;
 import communication.Peer.Key;
 import goGame.Board;
 import goGame.Index;
+import Strategy.Strategy;
+import Strategy.FillBoardStrategy;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,6 +18,7 @@ public class WebPlayer extends Player{
 	private int x;
 	private int y;
 	private Status status;
+	private Strategy strategy;
 		
 		/**
 		 * creates a human player instance
@@ -25,7 +28,7 @@ public class WebPlayer extends Player{
 		 */
 		public WebPlayer(String name, Status status, int boardSize){
 			super(name, status, boardSize);
-			this.status = status;
+			this.strategy = new FillBoardStrategy();
 			
 		}
 		

@@ -84,7 +84,7 @@ public class Client extends Thread{
 	 * @throws IOException
 	 */
 	public Client(String name, InetAddress gameServerAddress, int port) throws IOException{
-		this.name = Key.PLAYER + " " + name; 
+		this.name = name; 
 		this.socket = new Socket(gameServerAddress, port);
 		this.in = new BufferedReader(new InputStreamReader (this.socket.getInputStream()));
 		this.out = new BufferedWriter(new OutputStreamWriter (this.socket.getOutputStream()));
@@ -247,8 +247,7 @@ public void readServerInput(){
 				stoneStatus = status1;
 				Status p1 = stringToStatus(status1);
 				Status p2 = (p1 == Status.BLACK) ? Status.WHITE : Status.BLACK;
-				new AI(Status.BLACK, new FillBoardStrategy(), Integer.parseInt(splited[3]));
-				Player player1 = new AI(Status.BLACK, new FillBoardStrategy(), Integer.parseInt(splited[3]));
+				Player player1 = new WebPlayer(name, p1, Integer.parseInt(splited[3]));
 				Player player2 = new WebPlayer(splited[2], p2, Integer.parseInt(splited[3]));
 				game = new Game(player1,player2,Integer.parseInt(splited[3]));
 				game.start();

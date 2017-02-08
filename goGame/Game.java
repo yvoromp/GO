@@ -5,10 +5,9 @@ import java.util.HashSet;
 import java.util.Scanner;
 
 import Players.Player;
-import communication.Peer.Key;
 import goGame.Board.Status;
 
-public class Game {
+public class Game extends Thread{
 	
 	public static final int NUMBER_PLAYERS =2;
 	private int boardSize;
@@ -20,7 +19,6 @@ public class Game {
 	public static HashSet <String> oldGamePositions;
 	public static int passedBefore = 0;
 	
-	//hallo man
 	/**
 	 * creates a new game
 	 * @param s0
@@ -44,17 +42,17 @@ public class Game {
 	}
 	
 	//starts the game and checks if you want a revanche
-	public void start() {
-		reset(boardSize);
-		play();
-		boolean rematch = rematch();
-		if(rematch){
-			board.gameEnded = false;
-			oldGamePositions = new HashSet<String>();
-			start();
-		}
-
-	}
+//	public void start() {
+//		reset(boardSize);
+//		play();
+//		boolean rematch = rematch();
+//		if(rematch){
+//			board.gameEnded = false;
+//			oldGamePositions = new HashSet<String>();
+//			start();
+//		}
+//
+//	}
 	
 	//checks the answer you type at the end of the game
     private boolean rematch() {
@@ -79,19 +77,19 @@ public class Game {
 	}
 	
 	//plays the game
-	public void play() {
-		update();
-		while(!this.board.gameOver()){
-			getCurrentPlayer().webMove(this.board);
-			//getCurrentPlayer().makeMove(this.board);
-			oldGamePositions.add(this.board.allPositions);
-			update();
-			playerIndex++;
-			playerIndex = playerIndex % NUMBER_PLAYERS;
-		}
-		printResult();
-		
-	}
+//	public void play() {
+//		update();
+//		while(!this.board.gameOver()){
+//			getCurrentPlayer().webMove(this.board);
+//			//getCurrentPlayer().makeMove(this.board);
+//			oldGamePositions.add(this.board.allPositions);
+//			update();
+//			playerIndex++;
+//			playerIndex = playerIndex % NUMBER_PLAYERS;
+//		}
+//		printResult();
+//		
+//	}
 	
 	//prints the game situation
 	public void update(){
