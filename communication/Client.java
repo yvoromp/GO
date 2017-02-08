@@ -16,7 +16,6 @@ import Players.WebPlayer;
 import Strategy.FillBoardStrategy;
 import communication.Peer.Key;
 import goGame.Game;
-import goGame.Board;
 import goGame.Board.Status;
 
 public class Client extends Thread{
@@ -263,7 +262,6 @@ public void readServerInput(){
 					myTurn = false;
 				}else{
 					print("opponent made a move, your turn!");
-					Status playedStatus = stringToStatus(status);
 					int x = Integer.parseInt(splited[2]);
 					int y = Integer.parseInt(splited[3]);
 					game.board.setStone(game.board.getPointAt(x,y));

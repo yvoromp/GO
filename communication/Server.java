@@ -22,8 +22,7 @@ import java.util.ArrayList;
 
 
 public class Server {
-
-	private static final String NAPI = "args : " + Server.class.getName() + " [port]";
+	
 	public ArrayList<Peer> threads;
 	public HashMap <Integer, HashSet<String>> clientPref;
 	public HashMap <String, Integer> waiting;
@@ -35,18 +34,6 @@ public class Server {
 
 	//tries to start a Server
 	public static void main (String[] args){
-
-//		if(args.length != 1){
-//			System.out.println(" terminate on " + NAPI);
-//			System.exit(0); //abnormal termination of the JVM
-//		}
-//		try{
-//			Integer.parseInt(port);
-//		}catch(NumberFormatException e){   // port is not of the numeric type
-//			System.out.println("selected port is not an integer");
-//			System.exit(0);
-//		}
-
 		Server server = new Server(myPort);
 		server.run();
 	}
@@ -102,7 +89,7 @@ public class Server {
 		System.out.println(text);
 	}
 
-	//sends message to all clients in the clientarray
+	//sends message to all clients in the client array
 	public synchronized void sendAll(String text){
 		for (Peer peer : threads){
 			peer.sendCommandText(text);
@@ -178,7 +165,6 @@ public class Server {
 			print("client game preferences saved");
 		}
 		print("check5");
-		//adds name of client to boardSize pref.
 		clientPref.get(boardSize).add(peer.getClientName());
 		print(clientPref.get(boardSize).toString() +"    all values");
 		if(clientPairBoardSize() != 0 ){
@@ -222,7 +208,6 @@ public class Server {
 			
 	public void startGoGame(int prefBoardSize){	
 		print("clients paired a game is going to start!");
-		//TODO: change to toString(String[]) instead of cutting by split() methods? 
 		HashSet<String> set = clientPref.get(prefBoardSize);
 		String [] pairedClients = set.toArray(new String[set.size()]);
 		
@@ -245,10 +230,10 @@ public class Server {
 		peer1.sendCommandText(Key.READY + " " + "black" + " " + peer1.getClientName() + " " + prefBoardSize);
 		peer2.sendCommandText(Key.READY + " " + "white" + " " + peer2.getClientName() + " " + prefBoardSize);
 		addNewGame(game, peer1, peer2);
-		removeFromWaitingList(pairedClients[0]);
-		removeFromWaitingList(pairedClients[1]);
 		sendAll(Key.CHAT + " " +"new game started between " + peer1.getClientName() + " and " + peer2.getClientName());
 		game.start();
+		removeFromWaitingList(pairedClients[0]);
+		removeFromWaitingList(pairedClients[1]);
 
 
 	}
