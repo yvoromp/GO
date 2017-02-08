@@ -226,8 +226,9 @@ public class Server {
 			}
 		}
 		
-		
+		peer1.sendCommandText("hello");
 		peer1.sendCommandText(Key.READY + " " + "black" + " " + peer2.getClientName() + " " + prefBoardSize);
+		peer2.sendCommandText("hello2");
 		peer2.sendCommandText(Key.READY + " " + "white" + " " + peer1.getClientName() + " " + prefBoardSize);
 		addNewGame(game, peer1, peer2);
 		sendAll(Key.CHAT + " " +"new game started between " + peer1.getClientName() + " and " + peer2.getClientName());

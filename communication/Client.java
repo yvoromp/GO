@@ -312,6 +312,7 @@ public void readServerInput(){
 			case PLAYER:
 				break;
 			default:
+				print(serverInput);
 				break;
 			}
 		}
