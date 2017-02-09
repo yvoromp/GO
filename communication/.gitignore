@@ -3,3 +3,6 @@
 /Peer.class
 /Server.class
 /serverTest.class
+/ClientHandler$Key.class
+/ClientHandler.class
+/KeyConvertor.class

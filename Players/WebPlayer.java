@@ -4,7 +4,7 @@ import goGame.Board.Status;
 
 import java.util.Scanner;
 
-import communication.Peer.Key;
+import communication.ClientHandler.Key;
 import goGame.Board;
 import goGame.Index;
 import Strategy.Strategy;

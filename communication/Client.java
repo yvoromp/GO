@@ -14,7 +14,7 @@ import Players.AI;
 import Players.Player;
 import Players.WebPlayer;
 import Strategy.FillBoardStrategy;
-import communication.Peer.Key;
+import communication.ClientHandler.Key;
 import goGame.Game;
 import goGame.Board.Status;
 
@@ -57,9 +57,7 @@ public class Client extends Thread{
 			client.start();
 
 			do{
-				String keyboardInput = inputByKeyboard(client);
-				client.sendText(keyboardInput);
-
+				client.inputByKeyboard(client);
 			}while(true);
 
 		}catch(IOException e){
@@ -76,6 +74,8 @@ public class Client extends Thread{
 	private Game game;
 	private boolean connected;
 	public boolean myTurn;
+	private String validKeyboardInput;
+
 	/**
 	 * creates a new client object
 	 * @param name
@@ -160,167 +160,161 @@ public class Client extends Thread{
 		return (answer == null) ? "" : answer;
 	}
 
+	public boolean isKeyboardInput(){
+		BufferedReader k = new BufferedReader(new InputStreamReader(System.in));
+		validKeyboardInput = "";
+		boolean valid = false;
+		try{
+			valid = ((validKeyboardInput = k.readLine()) != null) ? true : false;
+		}catch (IOException e){
+			print("can't read the input");
+		}
+		return valid;
+
+	}
+
+	
+	public void moveMyStone(String Xpos, String yPos, Client client){
+		try{
+			int x = Integer.parseInt(Xpos);
+			int y = Integer.parseInt(yPos);
+			if(client.game.board.isValidMove(x, y)){
+				client.game.board.setStone(client.game.board.getPointAt(x, y));
+				client.sendText(validKeyboardInput);
+			}else{
+				print("invalid move man, please enter a valid move");
+			}
+		}catch (NumberFormatException e){
+			print("what are you doing? that shit ain't integers");
+		}
+	}
+
+
 	/**
 	 * takes input form terminal and prints it or sends it to peerclass
 	 * @param client
 	 * @return
 	 */
-	public static String inputByKeyboard(Client client){
-		String input = "";
+	public void inputByKeyboard(Client client){
 		try{
-			BufferedReader k = new BufferedReader(new InputStreamReader(System.in));
-			while((input = k.readLine()) != null){
-				try{
-					String[] splited = input.split(" ");
-					Key key = Key.valueOf(splited[0]);
-					switch(key){
-					case MOVE:
-						if (client.myTurn) {
-							try{
-								int x = Integer.parseInt(splited[1]);
-								int y = Integer.parseInt(splited[2]);
-								if(client.game.board.isValidMove(x, y)){
-									client.game.board.setStone(client.game.board.getPointAt(x, y));
-									client.sendText(input);
-									break;
-								}else{
-									print("invalid move man, please enter a valid move");
-								}
-							}catch (NumberFormatException e){
-								print("what your doing? that shit ain't integers");
-							}
-						}else{
-							print("It's not your turn to move");
-						}
-					break;
+			while(isKeyboardInput()){
+				String[] splited = validKeyboardInput.split(" ");
+				Key key = Key.valueOf(splited[0]);
 
-				case GO:
-					client.sendText(input);
+				switch(key){
+				case MOVE:
+					if (client.myTurn) {
+						moveMyStone(splited[1], splited[2], client);
+					}else{
+						print("It's not your turn to move");
+					}
 					break;
-				case PASS:
-					client.sendText(input);
+				default:
+					client.sendText(validKeyboardInput);
 					break;
-				case TABLEFLIP:
-					client.sendText(input);
+				}
+			}
+		}catch (IllegalArgumentException e){
+			print("you entered nonsense");
+		}	
+	}
+
+	/**
+	 * reads the input given from the peer or server and acts upon recieved input
+	 */
+	public void readServerInput(){
+		String serverInput = "";
+		try{
+			while(in.readLine() != null){
+				serverInput = in.readLine();
+				String[] splited = serverInput.split(" ");
+				Key key = Key.valueOf(splited[0]);
+				switch (key){
+
+				case WAITING:
+					print("Waiting on opponent.......");
 					break;
-				case CANCEL:
-					client.sendText(input);
+				case READY:
+					print("Opponent found");
+					String status1 = splited[1];
+					myTurn = status1.equals("black");
+					stoneStatus = status1;
+					Status p1 = stringToStatus(status1);
+					Status p2 = (p1 == Status.BLACK) ? Status.WHITE : Status.BLACK;
+					Player player1 = new WebPlayer(name, p1, Integer.parseInt(splited[3]));
+					Player player2 = new WebPlayer(splited[2], p2, Integer.parseInt(splited[3]));
+					game = new Game(player1,player2,Integer.parseInt(splited[3]));
+					game.start();
 					break;
 				case CHAT:
-					client.sendText(input);
+					print(serverInput);
+					break;
+				case VALID:
+					String status = splited[1];
+					if(status.equals(stoneStatus)){
+						myTurn = false;
+					}else{
+						print("opponent made a move, your turn!");
+						int x = Integer.parseInt(splited[2]);
+						int y = Integer.parseInt(splited[3]);
+						game.board.setStone(game.board.getPointAt(x,y));
+						myTurn = true;
+						break;
+					}
+					break;
+				case INVALID:
+					String statusToBeKicked = splited[1];
+					if(statusToBeKicked.equals(stoneStatus)){
+						print("nice job turd, bye bye!");
+					}else{
+						print("your opponent is a retard, he's gone");
+					}
+					break;
+				case WARNING:
+					print(serverInput);
+					break;
+				case END:
+					int score1 = Integer.parseInt(splited[1]);
+					int score2 = Integer.parseInt(splited[2]);
+					if(score1 < score2){
+						print("white won: " + score1 + " : " + score2);
+					}else if(score1 < score2){
+						print("black won: " + score1 + " : " + score2);
+					}else{
+						print("there's a draw " + score1 + " : " + score2);
+					}
+					break;
+				case TABLEFLIPPED:
+					print("your opponent flipped the board!");
 					break;
 				case EXIT:
-					client.sendText(input);
+					print("bye bye, playing time is over!");
+					in.close();
+					out.close();	
+					socket.close();
+					connected =false;
+					break;
+				case PASSED:
+					String passer= splited[1];
+					if(!passer.equals(stoneStatus)){
+						myTurn= true;
+						print("your opponent has passed, your turn!");
+					}else{
+						print("you passed this turn!");
+						myTurn = false;
+					}
+				case PLAYER:
+					break;
 				default:
+					print(serverInput);
 					break;
 				}
 			}
-			catch (IllegalArgumentException e){
-				print("you entered nonsense");
-			}
+		}catch (IOException e){
+			print("can't read the input from server");
+		}catch (IllegalArgumentException e){
+			print("wrong use of keywords by the server");
 		}
-	}catch (IOException e){
-		print("can't read the input");
 	}
-	return input;	
-}
-
-/**
- * reads the input given from the peer or server and acts upon recieved input
- */
-public void readServerInput(){
-	String serverInput = "";
-	try{
-		while(in.readLine() != null){
-			serverInput = in.readLine();
-			String[] splited = serverInput.split(" ");
-			Key key = Key.valueOf(splited[0]);
-			switch (key){
-
-			case WAITING:
-				print("Waiting on opponent.......");
-				break;
-			case READY:
-				print("Opponent found");
-				String status1 = splited[1];
-				myTurn = status1.equals("black");
-				stoneStatus = status1;
-				Status p1 = stringToStatus(status1);
-				Status p2 = (p1 == Status.BLACK) ? Status.WHITE : Status.BLACK;
-				Player player1 = new WebPlayer(name, p1, Integer.parseInt(splited[3]));
-				Player player2 = new WebPlayer(splited[2], p2, Integer.parseInt(splited[3]));
-				game = new Game(player1,player2,Integer.parseInt(splited[3]));
-				game.start();
-				break;
-			case CHAT:
-				print(serverInput);
-				break;
-			case VALID:
-				String status = splited[1];
-				if(status.equals(stoneStatus)){
-					myTurn = false;
-				}else{
-					print("opponent made a move, your turn!");
-					int x = Integer.parseInt(splited[2]);
-					int y = Integer.parseInt(splited[3]);
-					game.board.setStone(game.board.getPointAt(x,y));
-					myTurn = true;
-					break;
-				}
-				break;
-			case INVALID:
-				String statusToBeKicked = splited[1];
-				if(statusToBeKicked.equals(stoneStatus)){
-					print("nice job turd, bye bye!");
-				}else{
-					print("your opponent is a retard, he's gone");
-				}
-				break;
-			case WARNING:
-				print(serverInput);
-				break;
-			case END:
-				int score1 = Integer.parseInt(splited[1]);
-				int score2 = Integer.parseInt(splited[2]);
-				if(score1 < score2){
-					print("white won: " + score1 + " : " + score2);
-				}else if(score1 < score2){
-					print("black won: " + score1 + " : " + score2);
-				}else{
-					print("there's a draw " + score1 + " : " + score2);
-				}
-				break;
-			case TABLEFLIPPED:
-				print("your opponent flipped the board!");
-				break;
-			case EXIT:
-				print("bye bye, playing time is over!");
-				in.close();
-				out.close();	
-				socket.close();
-				connected =false;
-				break;
-			case PASSED:
-				String passer= splited[1];
-				if(!passer.equals(stoneStatus)){
-					myTurn= true;
-					print("your opponent has passed, your turn!");
-				}else{
-					print("you passed this turn!");
-					myTurn = false;
-				}
-			case PLAYER:
-				break;
-			default:
-				print(serverInput);
-				break;
-			}
-		}
-	}catch (IOException e){
-		print("can't read the input from server");
-	}catch (IllegalArgumentException e){
-		print("wrong use of keywords by the server");
-	}
-}
 
 }

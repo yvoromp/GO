@@ -8,7 +8,7 @@ import java.net.UnknownHostException;
 import org.junit.Before;
 import org.junit.Test;
 import communication.Client;
-import communication.Peer.Key;
+import communication.ClientHandler.Key;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;

@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import Players.Player;
-import communication.Peer.Key;
+import communication.ClientHandler.Key;
 import goGame.Board.Status;
 import goGame.Game;
 import goGame.Go;
@@ -23,11 +23,11 @@ import java.util.ArrayList;
 
 public class Server {
 	
-	public ArrayList<Peer> threads;
+	public ArrayList<ClientHandler> threads;
 	public HashMap <Integer, HashSet<String>> clientPref;
 	public HashMap <String, Integer> waiting;
-	public HashMap <Peer, Game> clientInGame;
-	public HashMap <Game, HashSet<Peer>> allClientsInGame;
+	public HashMap <ClientHandler, Game> clientInGame;
+	public HashMap <Game, HashSet<ClientHandler>> allClientsInGame;
 	
 	private static int myPort = 8989;
 
@@ -42,11 +42,11 @@ public class Server {
 	//create a new server object
 	public Server(int port){
 		myPort = port;
-		threads = new ArrayList<Peer>();
+		threads = new ArrayList<ClientHandler>();
 		clientPref = new HashMap<Integer, HashSet<String>>();
 		waiting = new HashMap<String, Integer>();
-		clientInGame = new HashMap <Peer, Game>();
-		allClientsInGame = new HashMap <Game, HashSet<Peer>>();
+		clientInGame = new HashMap <ClientHandler, Game>();
+		allClientsInGame = new HashMap <Game, HashSet<ClientHandler>>();
 
 	}
 
@@ -70,10 +70,10 @@ public class Server {
 			try{
 				Socket socket = serverSocket.accept();
 				System.out.println("new client connected!");
-				Peer peer = new Peer(this, socket);
-				addPeer(peer);
+				ClientHandler clientHandler = new ClientHandler(this, socket);
+				addPeer(clientHandler);
 				System.out.println("new peer-connection made");
-				Thread peerThread = new Thread(peer);
+				Thread peerThread = new Thread(clientHandler);
 				peerThread.start();
 				System.out.println("new thread started");
 				
@@ -91,14 +91,14 @@ public class Server {
 
 	//sends message to all clients in the client array
 	public synchronized void sendAll(String text){
-		for (Peer peer : threads){
-			peer.sendCommandText(text);
+		for (ClientHandler clientHandler : threads){
+			clientHandler.sendCommandText(text);
 		}
 	}
 	
 	//send only to the two paired clients
-	public synchronized void sendToPairedClients(String text, Peer peer){
-		for(Peer peerInGame : allClientsInGame.get(clientInGame.get(peer))){
+	public synchronized void sendToPairedClients(String text, ClientHandler clientHandler){
+		for(ClientHandler peerInGame : allClientsInGame.get(clientInGame.get(clientHandler))){
 		System.out.println(text);
 		peerInGame.sendCommandText(text);
 		}
@@ -107,24 +107,24 @@ public class Server {
 	
 
 	//adds a peerconnection to the threadList
-	private void addPeer(Peer peer) {
-		threads.add(peer);
+	private void addPeer(ClientHandler clientHandler) {
+		threads.add(clientHandler);
 		if(threads.size() > 20){
 			System.out.println("maximum amount of clients reached");
-			peer.sendCommandText(Key.CHAT + " maximum amount of clients reached");
-			removePeer(peer);
+			clientHandler.sendCommandText(Key.CHAT + " maximum amount of clients reached");
+			removePeer(clientHandler);
 		}
 		System.out.println("peer connection added");
 	}
 
 	//removes the Thread of the selected client
-	public void removePeer(Peer peer){
-		threads.remove(peer);
+	public void removePeer(ClientHandler clientHandler){
+		threads.remove(clientHandler);
 		System.out.println("peer connection removed");
 	}
 	
 	//adds a new game to the map	
-	public void addNewGame(Game game, Peer peer1, Peer peer2){
+	public void addNewGame(Game game, ClientHandler peer1, ClientHandler peer2){
 		//players get coupled to a game 
 		clientInGame.put(peer1, game);
 		clientInGame.put(peer2, game);
@@ -137,41 +137,41 @@ public class Server {
 	}
 	
 	//returns game of the peer object
-	public Game getGame(Peer peer){
-		return clientInGame.get(peer);
+	public Game getGame(ClientHandler clientHandler){
+		return clientInGame.get(clientHandler);
 	}
 	
 	//removes the game by removing client from waitingList and the current game 
-	public void removeGame(Peer peer){
-		allClientsInGame.get(waiting.get(peer)).remove(peer);
-		clientInGame.remove(peer);
+	public void removeGame(ClientHandler clientHandler){
+		allClientsInGame.get(waiting.get(clientHandler)).remove(clientHandler);
+		clientInGame.remove(clientHandler);
 	}
 	
 	//stops the current game
-	public void kickClient(Peer peer){
-		clientInGame.get(peer).board.gameOver();
+	public void kickClient(ClientHandler clientHandler){
+		clientInGame.get(clientHandler).board.gameOver();
 		try{
-			peer.getClient().close();
+			clientHandler.getClient().close();
 		}catch(IOException e){
 			print("encountered kick - problem with closing of client's socket");
 		}
 	}
 	
 	//adds peer to the waiting list
-	public void addToWaitingList(Peer peer, Integer boardSize){
-		waiting.put(peer.getClientName(), boardSize);
+	public void addToWaitingList(ClientHandler clientHandler, Integer boardSize){
+		waiting.put(clientHandler.getClientName(), boardSize);
 		if(!clientPref.containsKey(boardSize)){
 			clientPref.put(boardSize, new HashSet<String>());
 			print("client game preferences saved");
 		}
 		print("check5");
-		clientPref.get(boardSize).add(peer.getClientName());
+		clientPref.get(boardSize).add(clientHandler.getClientName());
 		print(clientPref.get(boardSize).toString() +"    all values");
 		if(clientPairBoardSize() != 0 ){
 			int prefBoardSize = boardSize;
 			startGoGame(prefBoardSize);
 		}else{
-			peer.sendCommandText(Key.WAITING + "");
+			clientHandler.sendCommandText(Key.WAITING + "");
 		}
 		print("client added to waitinglist");
 		
@@ -211,18 +211,18 @@ public class Server {
 		HashSet<String> set = clientPref.get(prefBoardSize);
 		String [] pairedClients = set.toArray(new String[set.size()]);
 		
-		Peer peer1 = null;
-		Peer peer2 = null;
+		ClientHandler peer1 = null;
+		ClientHandler peer2 = null;
 		System.out.println(pairedClients[0] + " playing with black");
 		System.out.println(pairedClients[1] + " playing with white");
 		Player player1 = Go.newWebPlayer(pairedClients[0], Status.BLACK, prefBoardSize);
 		Player player2 = Go.newWebPlayer(pairedClients[1], Status.WHITE, prefBoardSize);
 		Game game = new Game(player1, player2, prefBoardSize);
-		for(Peer peer : threads){
-			if(peer.getClientName().equals(pairedClients[0])){
-				peer1 = peer;
-			}else if(peer.getClientName().equals(pairedClients[1])){
-				peer2 = peer;
+		for(ClientHandler clientHandler : threads){
+			if(clientHandler.getClientName().equals(pairedClients[0])){
+				peer1 = clientHandler;
+			}else if(clientHandler.getClientName().equals(pairedClients[1])){
+				peer2 = clientHandler;
 			}
 		}
 		

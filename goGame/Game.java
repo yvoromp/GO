@@ -63,6 +63,7 @@ public class Game extends Thread{
             if(answer.equals("y")){
             	bAnswer = true;
             }
+            in.close();
             return bAnswer;
     }
         
