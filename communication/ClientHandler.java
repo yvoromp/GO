@@ -172,7 +172,7 @@ public class ClientHandler extends Thread{
 					check.keyPass(currentStone, passCounter, server, this);
 					break;
 				case PLAYER:
-					check.keyPlayer(splited[1], server);
+					check.keyPlayer(splited[1], server, this);
 					break;
 				default:
 					sendCommandText(Key.CHAT + " " + validInput);

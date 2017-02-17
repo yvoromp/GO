@@ -240,17 +240,19 @@ public class Client extends Thread{
 				case WAITING:
 					print("Waiting on opponent.......");
 					break;
+					
 				case READY:
 					print("Opponent found");
 					String status1 = splited[1];
 					myTurn = status1.equals("black");
+					print(myTurn + "   = myTurn");
 					stoneStatus = status1;
-					Status p1 = stringToStatus(status1);
-					Status p2 = (p1 == Status.BLACK) ? Status.WHITE : Status.BLACK;
-					Player player1 = new WebPlayer(name, p1, Integer.parseInt(splited[3]));
-					Player player2 = new WebPlayer(splited[2], p2, Integer.parseInt(splited[3]));
+					print("my status is   " + status1);
+					Player player1 = new WebPlayer(name, Status.BLACK, Integer.parseInt(splited[3]));
+					Player player2 = new WebPlayer(splited[2], Status.WHITE, Integer.parseInt(splited[3]));
 					game = new Game(player1,player2,Integer.parseInt(splited[3]));
 					game.start();
+					gameStarted=true;
 					break;
 				case CHAT:
 					print(serverInput);
@@ -258,12 +260,18 @@ public class Client extends Thread{
 				case VALID:
 					String status = splited[1];
 					if(status.equals(stoneStatus)){
+						int x = Integer.parseInt(splited[2]);
+						int y = Integer.parseInt(splited[3]);
+						game.board.setStone(game.board.getPointAt(x,y));
+						game.update();
 						myTurn = false;
+						print(myTurn +  " : is myturn1! ");
 					}else{
 						print("opponent made a move, your turn!");
 						int x = Integer.parseInt(splited[2]);
 						int y = Integer.parseInt(splited[3]);
 						game.board.setStone(game.board.getPointAt(x,y));
+						game.update();
 						myTurn = true;
 						break;
 					}
@@ -310,6 +318,7 @@ public class Client extends Thread{
 						myTurn = false;
 					}
 				case PLAYER:
+					name = splited[1];
 					break;
 				default:
 					print(serverInput);
@@ -319,7 +328,7 @@ public class Client extends Thread{
 		}catch (IOException e){
 			print("can't read the input from server");
 		}catch (IllegalArgumentException e){
-			print("wrong use of keywords by the server");
+			e.printStackTrace();
 		}
 	}
 
