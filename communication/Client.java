@@ -317,6 +317,7 @@ public class Client extends Thread{
 						print("you passed this turn!");
 						myTurn = false;
 					}
+					break;
 				case PLAYER:
 					name = splited[1];
 					break;

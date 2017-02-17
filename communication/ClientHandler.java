@@ -61,6 +61,11 @@ public class ClientHandler extends Thread{
 	public String getClientName(){
 		return name;
 	}
+	
+	public String statusToString(Status stone){
+		String s = stone.equals(Status.BLACK) ? "black" : "white";
+		return s;
+	}
 
 
 

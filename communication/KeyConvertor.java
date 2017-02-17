@@ -1,6 +1,7 @@
 package communication;
 
 import communication.ClientHandler.Key;
+import communication.Client;
 import goGame.Board.Status;
 
 public class KeyConvertor {
@@ -54,19 +55,22 @@ public class KeyConvertor {
 		server.sendToPairedClients(Key.PASSED + " " + stonestate2, clientHandler);
 	}
 	
-	public void keyPlayer(String name, Server server){
+	public void keyPlayer(String name, Server server, ClientHandler clientHandler){
+		clientHandler.name = name;
 		server.print(name + " had joined the server");
 		server.sendAll(Key.PLAYER + " " + name);
 		
 	}
 	
-	public void keyMove(String xPos, String yPos, Status playedStone, Server server, ClientHandler clientHandler){
+	public void keyMove(String xPos, String yPos, Status myStone, Server server, ClientHandler clientHandler){
+		server.sendToPairedClients(" move detected !", clientHandler);
 		clientHandler.passCounter = 0;
 		int playerIndex = server.getGame(clientHandler).getPlayerIndex();
 		Status currentStone = (playerIndex == 0) ? Status.BLACK : Status.WHITE;
 		int x = -1;
 		int y = -1;
-		if(currentStone.equals(playedStone)){
+		if(currentStone.equals(myStone)){
+			String stoneToString = clientHandler.statusToString(myStone);
 			try{
 				int xInput = Integer.parseInt(xPos);
 				x = xInput;
@@ -74,18 +78,19 @@ public class KeyConvertor {
 				y = yInput;
 			}catch(NumberFormatException e){
 				clientHandler.sendCommandText(Key.WARNING + " " + "there's no integer there (wo)man!");
-				server.sendToPairedClients(Key.INVALID + " " + playedStone + " invalid move!", clientHandler);
+				server.sendToPairedClients(Key.INVALID + " " + stoneToString + " invalid move!", clientHandler);
 				server.kickClient(clientHandler);
 				server.sendToPairedClients(Key.END + " " + clientHandler.getClientName() + " " + "lost!", clientHandler);
 			}
 			if(server.getGame(clientHandler).board.isValidMove(x, y)){
-				server.sendToPairedClients(Key.VALID + " " + playedStone + " " + x + " " + y, clientHandler);
 				server.getGame(clientHandler).board.setStone(server.getGame(clientHandler).board.getPointAt(x, y));
-				if (playedStone == Status.BLACK){
+				server.sendToPairedClients(Key.VALID + " " + stoneToString + " " + x + " " + y, clientHandler);
+				
+				if (myStone == Status.BLACK){
 					server.getGame(clientHandler).board.blackPassed = false;
 				}
 				else{
-					server.sendToPairedClients(Key.INVALID + " " + playedStone + " invalid move!", clientHandler);
+					server.sendToPairedClients(Key.INVALID + " " + stoneToString + " invalid move!", clientHandler);
 					server.kickClient(clientHandler);
 					server.sendToPairedClients(Key.END + " " + clientHandler.getClientName() + " lost!", clientHandler);
 				}
@@ -97,12 +102,5 @@ public class KeyConvertor {
 			}
 		}
 	}
-
-
-
-
-
-
-
 
 }
