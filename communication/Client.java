@@ -116,7 +116,7 @@ public class Client extends Thread{
 	}
 
 	/**
-	 * send text to the peerclass
+	 * send text to the clientHandlerclass
 	 * @param text
 	 */
 	public void sendText(String text){
@@ -191,7 +191,7 @@ public class Client extends Thread{
 
 
 	/**
-	 * takes input form terminal and prints it or sends it to peerclass
+	 * takes input form terminal and prints it or sends it to clientHandlerclass
 	 * @param client
 	 * @return
 	 */
@@ -220,7 +220,7 @@ public class Client extends Thread{
 	}
 
 	/**
-	 * reads the input given from the peer or server and acts upon recieved input
+	 * reads the input given from the clientHandler or server and acts upon recieved input
 	 */
 	public void readServerInput(){
 		String serverInput = "";

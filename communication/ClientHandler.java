@@ -27,7 +27,7 @@ public class ClientHandler extends Thread{
 	public enum Key{PLAYER, END ,CHAT,INVALID,WARNING,GO,CANCEL,WAITING,READY,MOVE,VALID,PASS,PASSED,TABLEFLIP,TABLEFLIPPED, EXIT}
 
 	/**
-	 * try to create a new peer object and init both streams
+	 * try to create a new clientHandler object and init both streams
 	 * @param server
 	 * @param socket
 	 * @throws IOException
@@ -65,7 +65,7 @@ public class ClientHandler extends Thread{
 
 
 	/**
-	 * sends commandtexts over a socket to the peer
+	 * sends commandtexts over a socket to the clientHandler
 	 * @param text
 	 */
 	public void sendCommandText(String text){
@@ -102,7 +102,7 @@ public class ClientHandler extends Thread{
 	// terminates the connection
 	public void shutDown(){
 		System.out.println("connection terminated!");
-		server.removePeer(this);
+		server.removeClientHandler(this);
 
 	}
 
@@ -181,7 +181,7 @@ public class ClientHandler extends Thread{
 			}
 		}catch(IllegalArgumentException e){
 			sendCommandText(Key.WARNING + " " + "use the right keywords and arguments!");
-			server.print(" peer.run shutdown");	
+			server.print(" clientHandler.run shutdown");	
 		}
 		shutDown();
 	}
