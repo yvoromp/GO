@@ -70,7 +70,7 @@ public class ClientHandler extends Thread{
 
 
 	/**
-	 * sends commandtexts over a socket to the clientHandler
+	 * sends commandtexts over a socket to the client
 	 * @param text
 	 */
 	public void sendCommandText(String text){
@@ -186,7 +186,7 @@ public class ClientHandler extends Thread{
 			}
 		}catch(IllegalArgumentException e){
 			sendCommandText(Key.WARNING + " " + "use the right keywords and arguments!");
-			server.print(" clientHandler.run shutdown");	
+			server.print("WARNING!! clientHandler.run shutdown");	
 		}
 		shutDown();
 	}

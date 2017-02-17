@@ -2,9 +2,10 @@ package goGame;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Scanner;
 
 import Players.Player;
+import communication.Client;
+import communication.ClientHandler.Key;
 
 public class Game extends Thread{
 	
@@ -57,17 +58,17 @@ public class Game extends Thread{
 //	}
 	
 	//checks the answer you type at the end of the game
-    private boolean rematch() {
-        boolean bAnswer = false;
-        System.out.print("\n do you want to play again? [y]");
-        Scanner in = new Scanner(System.in);
-            String answer = in.nextLine();
-            if(answer.equals("y")){
-            	bAnswer = true;
-            }
-            in.close();
-            return bAnswer;
-    }
+//    private boolean rematch() {
+//        boolean bAnswer = false;
+//        System.out.print("\n do you want to play again? [y]");
+//        Scanner in = new Scanner(System.in);
+//            String answer = in.nextLine();
+//            if(answer.equals("y")){
+//            	bAnswer = true;
+//            }
+//            in.close();
+//            return bAnswer;
+//    }
         
         
         
@@ -120,5 +121,19 @@ public class Game extends Thread{
 	public HashMap<String, Player> getPlayers(){
 		return this.players;
 	}	
+	public void moveMyStone(String Xpos, String yPos, Client client){
+	try{
+		int x = Integer.parseInt(Xpos);
+		int y = Integer.parseInt(yPos);
+		if(board.isValidMove(x, y)){
+			board.setStone(board.getPointAt(x, y));
+			client.sendText(Key.MOVE + " " +x + " " +y);
+		}else{
+			client.print("invalid move man, please enter a valid move");
+		}
+	}catch (NumberFormatException e){
+		client.print("what are you doing? that shit ain't integers");
+	}
+}
 
 }

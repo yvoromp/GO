@@ -1,10 +1,32 @@
 package communication;
 
 import communication.ClientHandler.Key;
-import communication.Client;
+import goGame.Game;
 import goGame.Board.Status;
+import Players.Player;
+import Players.WebPlayer;
 
 public class KeyConvertor {
+	
+	public void keyReady(Client client, String status, String otherClientName, String boardSize){
+		int validSize = 0;
+		try{
+			int size = Integer.parseInt(boardSize);
+			validSize = size;
+		}catch(NumberFormatException e){
+			client.print("wrong dimension given by the server");
+			client.connected = false;
+		}
+		client.print("Opponent found!");
+		client.myTurn = status.equals("black");
+		client.stoneStatus = status;
+		client.print("You are playing with " + status);
+		Player player1 = new WebPlayer(client.name, Status.BLACK, validSize);
+		Player player2 = new WebPlayer(otherClientName, Status.WHITE, validSize);
+		client.game = new Game(player1,player2,validSize);
+		client.game.start();
+		client.gameStarted=true;
+	}
 
 
 	public void keyGo(String boardSize, Server server, ClientHandler clientHandler){
@@ -19,7 +41,57 @@ public class KeyConvertor {
 			clientHandler.sendCommandText(Key.WARNING + " " + "there's no integer there (wo)man!");
 		}
 	}
+	
+	public void keyValid(Client client, String status, String xPos, String yPos){
+		int x = 0;
+		int y = 0;
+		try{
+			x = Integer.parseInt(xPos);
+			y = Integer.parseInt(yPos);
+		}catch ( NumberFormatException e){
+			client.print("wrong dimension given by the server");
+			client.connected = false;
+		}
+		if(status.equals(client.stoneStatus)){
+			client.game.board.setStone(client.game.board.getPointAt(x,y));
+			client.game.update();
+			client.myTurn = false;
+			client.print("It's your opponents turn!");
+		}else{
+			client.game.board.setStone(client.game.board.getPointAt(x,y));
+			client.game.update();
+			client.myTurn = true;
+			client.print("opponent made a move, your turn!");
+		}
+	}
+	
+	public void keyInvalid(Client client, String status){
+		if(status.equals(client.stoneStatus)){
+			client.print("nice job turd, bye bye!");
+		}else{
+			client.print("your opponent is a retard, he's gone");
+		}
+	}
 
+	public void keyEnd(Client client, String scorePlayer1, String scorePlayer2){
+		int score1 = 0;
+		int score2 = 0;
+		try{
+			score1 = Integer.parseInt(scorePlayer1);
+			score2 = Integer.parseInt(scorePlayer2);
+		}catch(NumberFormatException e){
+			client.print("score doesn't translate to numbers");
+		}
+		if(score1 < score2){
+			client.print("white won: " + score1 + " : " + score2);
+		}else if(score1 > score2){
+			client.print("black won: " + score1 + " : " + score2);
+		}else{
+			client.print("there's a draw " + score1 + " : " + score2);
+		}
+	}
+	
+	
 	public void keyExit(Server server, String name, ClientHandler clientHandler){
 		server.sendAll(Key.WARNING + " " + name + "is not longer connected to the server");
 		server.print(" caseEXIT shutdown");
@@ -61,6 +133,17 @@ public class KeyConvertor {
 		server.sendAll(Key.PLAYER + " " + name);
 		
 	}
+	
+	public void keyPassed(Client client, String statusOfPasser){
+		if(!statusOfPasser.equals(client.stoneStatus)){
+			client.myTurn= true;
+			client.print("your opponent has passed, your turn!");
+		}else{
+			client.print("you passed this turn!");
+			client.myTurn = false;
+		}
+	}
+	
 	
 	public void keyMove(String xPos, String yPos, Status myStone, Server server, ClientHandler clientHandler){
 		server.sendToPairedClients(" move detected !", clientHandler);

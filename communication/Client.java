@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.net.UnknownHostException;		// Thrown to indicate that the IP address of a host could not be determined.
 
 import Players.Player;
-import Players.WebPlayer;
 import communication.ClientHandler.Key;
 import goGame.Game;
 import goGame.Board.Status;
@@ -41,7 +40,7 @@ public class Client extends Thread{
 			try{
 				port = Integer.parseInt(readText("fill in the portnumber"));
 			}catch(NumberFormatException e){   // port is not of the numeric type
-				print("port: " + port + " is not an integer");
+				System.out.println("port: " + port + " is not an integer");
 				System.exit(0); //abnormal termination of the JVM
 			}
 		}
@@ -52,9 +51,10 @@ public class Client extends Thread{
 			String clientName = readText("fill in your name");
 			Client client = new Client(clientName, gameServerAddress, port);
 			client.sendText(Key.PLAYER + " " + clientName);
+			keyBoardInput clientKeyBoardInput = new keyBoardInput();
 			client.start();
 			while (true){
-				client.inputByKeyboard();
+				clientKeyBoardInput.inputByKeyboard(client);
 
 			}
 		}catch(IOException e){
@@ -63,16 +63,15 @@ public class Client extends Thread{
 		}
 	}
 
-	private String name;
+	protected String name;
 	public String stoneStatus;
 	private Socket socket;
 	private BufferedReader in;
 	private BufferedWriter out;
-	private Game game;
-	private boolean connected;
+	protected Game game;
+	protected boolean connected;
 	public boolean myTurn;
-	private String validKeyboardInput;
-	private boolean gameStarted = false;
+	protected boolean gameStarted = false;
 
 	/**
 	 * creates a new client object
@@ -145,7 +144,7 @@ public class Client extends Thread{
 	 * prints string to system.out
 	 * @param text
 	 */
-	public static void print(String text){
+	public void print(String text){
 		System.out.println(text);
 	}
 
@@ -165,138 +164,40 @@ public class Client extends Thread{
 		}
 		return (answer == null) ? "" : answer;
 	}
-
-	public boolean isKeyboardInput(){
-		BufferedReader k = new BufferedReader(new InputStreamReader(System.in));
-		validKeyboardInput = "";
-		boolean valid = false;
-		try{
-			valid = ((validKeyboardInput = k.readLine()) != null) ? true : false;
-		}catch (IOException e){
-			print("can't read the input");
-		}
-		return valid;
-
-	}
-
-
-//	public void moveMyStone(String Xpos, String yPos){
-//		try{
-//			int x = Integer.parseInt(Xpos);
-//			int y = Integer.parseInt(yPos);
-//			if(game.board.isValidMove(x, y)){
-//				game.board.setStone(game.board.getPointAt(x, y));
-//				sendText(validKeyboardInput);
-//			}else{
-//				print("invalid move man, please enter a valid move");
-//			}
-//		}catch (NumberFormatException e){
-//			print("what are you doing? that shit ain't integers");
-//		}
-//	}
-
-
+	
 	/**
 	 * takes input form terminal and prints it or sends it to clientHandlerclass
 	 * @param client
 	 * @return
 	 */
-	public void inputByKeyboard(){
-		try{
-			while(isKeyboardInput()){
-				String[] splited = validKeyboardInput.split(" ");
-				Key key = Key.valueOf(splited[0]);
 
-				switch(key){
-//				case MOVE:
-//					if (myTurn) {
-//						moveMyStone(splited[1], splited[2]);
-//					}else{
-//						print("It's not your turn to move");
-//					}
-//					break;
-				default:
-					sendText(validKeyboardInput);
-					break;
-				}
-			}
-		}catch (IllegalArgumentException e){
-			print("you entered nonsense");
-		}	
-	}
 
 	/**
 	 * reads the input given from the clientHandler or server and acts upon recieved input
 	 */
 	public void readServerInput(){
 		String serverInput = "";
+		KeyConvertor convert = new KeyConvertor();
 		try{
 			while((serverInput = in.readLine()) != null){
-				print(serverInput);
 				String[] splited = serverInput.split(" ");
 				Key key = Key.valueOf(splited[0]);
 				switch (key){
 
 				case WAITING:
 					print("Waiting on opponent.......");
-					break;
-					
+					break;	
 				case READY:
-					print("Opponent found");
-					String status1 = splited[1];
-					myTurn = status1.equals("black");
-					print(myTurn + "   = myTurn");
-					stoneStatus = status1;
-					print("my status is   " + status1);
-					Player player1 = new WebPlayer(name, Status.BLACK, Integer.parseInt(splited[3]));
-					Player player2 = new WebPlayer(splited[2], Status.WHITE, Integer.parseInt(splited[3]));
-					game = new Game(player1,player2,Integer.parseInt(splited[3]));
-					game.start();
-					gameStarted=true;
-					break;
-				case CHAT:
-					print(serverInput);
+					convert.keyReady(this, splited[1], splited[2], splited[3]);
 					break;
 				case VALID:
-					String status = splited[1];
-					if(status.equals(stoneStatus)){
-						int x = Integer.parseInt(splited[2]);
-						int y = Integer.parseInt(splited[3]);
-						game.board.setStone(game.board.getPointAt(x,y));
-						game.update();
-						myTurn = false;
-						print(myTurn +  " : is myturn1! ");
-					}else{
-						print("opponent made a move, your turn!");
-						int x = Integer.parseInt(splited[2]);
-						int y = Integer.parseInt(splited[3]);
-						game.board.setStone(game.board.getPointAt(x,y));
-						game.update();
-						myTurn = true;
-						break;
-					}
+					convert.keyValid(this, splited[1], splited[2], splited[3]);
 					break;
 				case INVALID:
-					String statusToBeKicked = splited[1];
-					if(statusToBeKicked.equals(stoneStatus)){
-						print("nice job turd, bye bye!");
-					}else{
-						print("your opponent is a retard, he's gone");
-					}
-					break;
-				case WARNING:
-					print(serverInput);
+					convert.keyInvalid(this, splited[1]);
 					break;
 				case END:
-					int score1 = Integer.parseInt(splited[1]);
-					int score2 = Integer.parseInt(splited[2]);
-					if(score1 < score2){
-						print("white won: " + score1 + " : " + score2);
-					}else if(score1 < score2){
-						print("black won: " + score1 + " : " + score2);
-					}else{
-						print("there's a draw " + score1 + " : " + score2);
-					}
+					convert.keyEnd(this, splited[1], splited[2]);
 					break;
 				case TABLEFLIPPED:
 					print("your opponent flipped the board!");
@@ -309,14 +210,7 @@ public class Client extends Thread{
 					connected =false;
 					break;
 				case PASSED:
-					String passer= splited[1];
-					if(!passer.equals(stoneStatus)){
-						myTurn= true;
-						print("your opponent has passed, your turn!");
-					}else{
-						print("you passed this turn!");
-						myTurn = false;
-					}
+					convert.keyPassed(this, splited[1]);
 					break;
 				case PLAYER:
 					name = splited[1];
