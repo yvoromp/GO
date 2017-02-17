@@ -5,13 +5,11 @@ import java.util.HashSet;
 import java.util.Scanner;
 
 import Players.Player;
-import communication.Peer.Key;
-import goGame.Board.Status;
 
-public class Game {
+public class Game extends Thread{
 	
 	public static final int NUMBER_PLAYERS =2;
-	private int boardSize;
+	public int boardSize;
 	public Board board;
 	private HashMap	<String, Player> players;
 	private Player player1;
@@ -20,7 +18,6 @@ public class Game {
 	public static HashSet <String> oldGamePositions;
 	public static int passedBefore = 0;
 	
-	//hallo man
 	/**
 	 * creates a new game
 	 * @param s0
@@ -29,7 +26,8 @@ public class Game {
 	 */
 	public Game(Player s0, Player s1, int boardSize){ 
 		this.boardSize = boardSize;
-		board = new Board();
+		board = new Board(boardSize);
+		board.reset(boardSize);
 		oldGamePositions = new HashSet<String>();
 		player1 = s0;
 		player2 = s1;
@@ -37,6 +35,8 @@ public class Game {
 		players.put(s0.getName(), s0);
 		players.put(s1.getName(), s1);
 		playerIndex = 0;
+		//play();
+		
 	}
 	
 	public Game(){
@@ -44,17 +44,17 @@ public class Game {
 	}
 	
 	//starts the game and checks if you want a revanche
-	public void start() {
-		reset(boardSize);
-		play();
-		boolean rematch = rematch();
-		if(rematch){
-			board.gameEnded = false;
-			oldGamePositions = new HashSet<String>();
-			start();
-		}
-
-	}
+//	public void start() {
+//		reset(boardSize);
+//		play();
+//		boolean rematch = rematch();
+//		if(rematch){
+//			board.gameEnded = false;
+//			oldGamePositions = new HashSet<String>();
+//			start();
+//		}
+//
+//	}
 	
 	//checks the answer you type at the end of the game
     private boolean rematch() {
@@ -65,6 +65,7 @@ public class Game {
             if(answer.equals("y")){
             	bAnswer = true;
             }
+            in.close();
             return bAnswer;
     }
         
@@ -72,31 +73,35 @@ public class Game {
         
 	
 	//resets the game
-	private void reset(int boardSize) {
-		playerIndex = 0;
-		board.reset(boardSize);
-		
+//	private void reset(int boardSize) {
+//		playerIndex = 0;
+//		board.reset(boardSize);
+//		
+//	}
+	public void changePlayerIndex(){
+		playerIndex++;
+		playerIndex = playerIndex % NUMBER_PLAYERS;
 	}
-	
+    
 	//plays the game
-	public void play() {
-		update();
-		while(!this.board.gameOver()){
-			getCurrentPlayer().webMove(this.board);
-			//getCurrentPlayer().makeMove(this.board);
-			oldGamePositions.add(this.board.allPositions);
-			update();
-			playerIndex++;
-			playerIndex = playerIndex % NUMBER_PLAYERS;
-		}
-		printResult();
-		
-	}
+//	public void play() {
+//		update();
+//		while(!this.board.gameOver()){
+//			getCurrentPlayer().webMove(this.board);
+//			//getCurrentPlayer().makeMove(this.board);
+//			oldGamePositions.add(this.board.allPositions);
+//			update();
+//			playerIndex++;
+//			playerIndex = playerIndex % NUMBER_PLAYERS;
+//		}
+//		printResult();
+//		
+//	}
 	
 	//prints the game situation
 	public void update(){
 		System.out.println("\n current game situation: \n\n" + board.toString() + "\n");
-		
+		changePlayerIndex();
 	}
 	
 	//prints the result of the played game

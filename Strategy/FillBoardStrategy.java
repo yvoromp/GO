@@ -2,7 +2,6 @@ package Strategy;
 
 
 import goGame.Board;
-import goGame.Index;
 import goGame.Board.Status;
 
 
@@ -16,17 +15,19 @@ public class FillBoardStrategy implements Strategy{
 	}
 	
 	@Override
-	public Index determineMove(Board b, Status s) {
+	public String determineMove(Board b, Status s) {
+		String random = "";
 		int x = (int) (Math.floor(Math.random()*(Board.DIM)));
 		int y = (int) (Math.floor(Math.random()* (Board.DIM)));
 		boolean valid = (b.isValidMove(x,y) && !b.isPlacementNoGood(b.getPointAt(x, y)));
+		random = "MOVE" + " " + x + " " + y;
 		while(!valid) {
 			x = (int) (Math.floor(Math.random()*(Board.DIM)));
 			y = (int) (Math.floor(Math.random()* (Board.DIM)));
 			valid = (b.isValidMove(x,y) && !b.isPlacementNoGood(b.getPointAt(x, y)));
+			random = "MOVE" + " " + x + " " + y;
 		}
-		System.out.println("move" + " " + x + " " + y);
-		return b.getPointAt(x,y);
+		return random;
 		
 	}
 	

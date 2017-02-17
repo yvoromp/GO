@@ -13,13 +13,13 @@ public class Board {
 		BLACK, WHITE, NONE
 	}
 	
-	public static int DIM = 5;
+	public static int DIM;
 	public Index lastMove;
 	public boolean deadStone;
 	public HashMap<Index, Status> stones;
 	public String allPositions = "";
 	public HashSet <String> oldPositions;
-	public static boolean isBlack = true;
+	public boolean isBlack = true;
 	public boolean blackPassed;
 	public boolean gameEnded = false;
 	public int blackStoneCounter;
@@ -31,8 +31,8 @@ public class Board {
 	
 	
 
-	public Board(){
-		stones = new HashMap<>();
+	public Board(int boardSize){
+		DIM = boardSize;
 		reset(DIM);
 	}
 	
@@ -61,7 +61,7 @@ public class Board {
 		allPositions = "";
 		for(int i = 0; i < DIM; i++){
 			for(int j = 0; j < DIM; j++){
-				String position = stones.get(new Index(j,i)).toString();
+				String position = stones.get(getPointAt(i,j)).toString();
 				allPositions = allPositions + position;
 			}
 		}
@@ -78,6 +78,10 @@ public class Board {
 		Status position = stones.get(i);
 		return position;
 		}
+	
+//	public Status getStatus(int x, int y) {
+//		return (stones.get(getPointAt(x, y)));
+//	}
 
 	/**
 	 * checks if the index is empty
@@ -94,7 +98,12 @@ public class Board {
 	}
 	
 	public Index getPointAt(int x, int y){
-		return new Index(x,y);
+		for (Index index : stones.keySet()) {
+			if (index.getX() == x && index.getY() == y) {
+				return index;
+			}
+		}
+		return null;
 	}
 	
 	/**
@@ -137,14 +146,14 @@ public class Board {
 		}
 		
 		if (stones.get(getPointAt(x,y)) != Status.NONE){
-			//System.out.println(" position1");
+			System.out.println(" position1");
 			return false;
 		}
 		Index stone = getPointAt(x,y);
 		setStone(stone);
 		if(getStatus(stone) == Status.NONE){
 			stones.put(stone, Status.NONE);
-			//System.out.println(" position2");
+			System.out.println(" position2");
 			return false;
 		}
 		
@@ -153,7 +162,7 @@ public class Board {
 		for (int i = 0; i < DIM; i++) {
 			String visual = "";
 			for (int j = 0; j < DIM; j++) {	
-				visual = visual + stones.get(new Index(j,i));	
+				visual = visual + stones.get(stone);	
 			}
 			s = s + visual ;
 		}
@@ -190,11 +199,10 @@ public class Board {
 				gameOver = true;
 			}
 		}
-		count = 0;
 
 		//checks if there was a game end by consecutive passing
 		if(gameEnded){
-			gameOver = true;;
+			gameOver = true;
 		}
 		return gameOver;
 	}
@@ -276,7 +284,7 @@ public class Board {
 		for (int i = 0; i < DIM; i++) {
 			String visualRow = "";
 			for (int j = 0; j < DIM; j++) {	
-			visualRow = visualRow + "    " + stones.get(new Index(j,i)) + "    ";
+			visualRow = visualRow + "    " + stones.get(getPointAt(i,j)) + "    ";
 				
 			if (j < DIM - 1) {
 				visualRow = visualRow + "|";
@@ -294,11 +302,15 @@ public class Board {
 	
 	//resets all the fields to empty
 	public void reset(int boardSize){
+		stones = new HashMap<Index, Status>();
 		DIM = boardSize;
-		stones = new HashMap<>();
+		System.out.println(DIM + "   :  is the DIM value ");
 		for (int i = 0; i < DIM; i++){
 			for(int j = 0; j < DIM; j++){
-				stones.put(new Index(i , j), Status.NONE);
+				Index index = new Index(i , j);
+				stones.put(index, Status.NONE);
+				//System.out.println("The first index position has status:  " + stones.get(index));
+				
 			}
 			
 		}
@@ -363,9 +375,9 @@ public class Board {
 			if(getStatus(neighbor) == getStatus(i)){
 				sameColorAsPlacedStone = true;
 			}
-			if(rightStage){
-				removeIfDeadStone(neighbor);
-			}
+//			if(rightStage){
+//				removeIfDeadStone(neighbor);
+//			}
 			
 			Set<Index> checkedNeighborStones = new HashSet<>();
 			checkedNeighborStones.add(i);
