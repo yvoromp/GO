@@ -2,7 +2,6 @@ package Strategy;
 
 
 import goGame.Board;
-import goGame.Index;
 import goGame.Board.Status;
 
 
