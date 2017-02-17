@@ -10,10 +10,8 @@ import java.net.InetAddress;
 import java.io.IOException;
 import java.net.UnknownHostException;		// Thrown to indicate that the IP address of a host could not be determined.
 
-import Players.AI;
 import Players.Player;
 import Players.WebPlayer;
-import Strategy.FillBoardStrategy;
 import communication.ClientHandler.Key;
 import goGame.Game;
 import goGame.Board.Status;
@@ -55,11 +53,10 @@ public class Client extends Thread{
 			Client client = new Client(clientName, gameServerAddress, port);
 			client.sendText(Key.PLAYER + " " + clientName);
 			client.start();
+			while (true){
+				client.inputByKeyboard();
 
-			do{
-				client.inputByKeyboard(client);
-			}while(true);
-
+			}
 		}catch(IOException e){
 			System.out.println("creating client object failed!");
 			System.exit(0);
@@ -75,6 +72,7 @@ public class Client extends Thread{
 	private boolean connected;
 	public boolean myTurn;
 	private String validKeyboardInput;
+	private boolean gameStarted = false;
 
 	/**
 	 * creates a new client object
@@ -109,6 +107,14 @@ public class Client extends Thread{
 		while(connected){
 			try{
 				readServerInput();
+				while(myTurn && gameStarted){
+					print("the while loop is activated");
+					Player myPlayer = game.getCurrentPlayer();
+					String chosenCoordinates = myPlayer.determineMove(game.board);
+					print("send: " + chosenCoordinates);
+					sendText(chosenCoordinates);
+					myTurn = !myTurn;
+				}
 			}catch(NullPointerException e){
 				print("can't read the server input");
 			}
@@ -173,21 +179,21 @@ public class Client extends Thread{
 
 	}
 
-	
-	public void moveMyStone(String Xpos, String yPos, Client client){
-		try{
-			int x = Integer.parseInt(Xpos);
-			int y = Integer.parseInt(yPos);
-			if(client.game.board.isValidMove(x, y)){
-				client.game.board.setStone(client.game.board.getPointAt(x, y));
-				client.sendText(validKeyboardInput);
-			}else{
-				print("invalid move man, please enter a valid move");
-			}
-		}catch (NumberFormatException e){
-			print("what are you doing? that shit ain't integers");
-		}
-	}
+
+//	public void moveMyStone(String Xpos, String yPos){
+//		try{
+//			int x = Integer.parseInt(Xpos);
+//			int y = Integer.parseInt(yPos);
+//			if(game.board.isValidMove(x, y)){
+//				game.board.setStone(game.board.getPointAt(x, y));
+//				sendText(validKeyboardInput);
+//			}else{
+//				print("invalid move man, please enter a valid move");
+//			}
+//		}catch (NumberFormatException e){
+//			print("what are you doing? that shit ain't integers");
+//		}
+//	}
 
 
 	/**
@@ -195,22 +201,22 @@ public class Client extends Thread{
 	 * @param client
 	 * @return
 	 */
-	public void inputByKeyboard(Client client){
+	public void inputByKeyboard(){
 		try{
 			while(isKeyboardInput()){
 				String[] splited = validKeyboardInput.split(" ");
 				Key key = Key.valueOf(splited[0]);
 
 				switch(key){
-				case MOVE:
-					if (client.myTurn) {
-						moveMyStone(splited[1], splited[2], client);
-					}else{
-						print("It's not your turn to move");
-					}
-					break;
+//				case MOVE:
+//					if (myTurn) {
+//						moveMyStone(splited[1], splited[2]);
+//					}else{
+//						print("It's not your turn to move");
+//					}
+//					break;
 				default:
-					client.sendText(validKeyboardInput);
+					sendText(validKeyboardInput);
 					break;
 				}
 			}
@@ -225,8 +231,8 @@ public class Client extends Thread{
 	public void readServerInput(){
 		String serverInput = "";
 		try{
-			while(in.readLine() != null){
-				serverInput = in.readLine();
+			while((serverInput = in.readLine()) != null){
+				print(serverInput);
 				String[] splited = serverInput.split(" ");
 				Key key = Key.valueOf(splited[0]);
 				switch (key){
