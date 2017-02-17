@@ -5,12 +5,11 @@ import java.util.HashSet;
 import java.util.Scanner;
 
 import Players.Player;
-import goGame.Board.Status;
 
 public class Game extends Thread{
 	
 	public static final int NUMBER_PLAYERS =2;
-	private int boardSize;
+	public int boardSize;
 	public Board board;
 	private HashMap	<String, Player> players;
 	private Player player1;
@@ -27,7 +26,8 @@ public class Game extends Thread{
 	 */
 	public Game(Player s0, Player s1, int boardSize){ 
 		this.boardSize = boardSize;
-		board = new Board();
+		board = new Board(boardSize);
+		board.reset(boardSize);
 		oldGamePositions = new HashSet<String>();
 		player1 = s0;
 		player2 = s1;
@@ -35,6 +35,8 @@ public class Game extends Thread{
 		players.put(s0.getName(), s0);
 		players.put(s1.getName(), s1);
 		playerIndex = 0;
+		//play();
+		
 	}
 	
 	public Game(){
@@ -71,12 +73,16 @@ public class Game extends Thread{
         
 	
 	//resets the game
-	private void reset(int boardSize) {
-		playerIndex = 0;
-		board.reset(boardSize);
-		
+//	private void reset(int boardSize) {
+//		playerIndex = 0;
+//		board.reset(boardSize);
+//		
+//	}
+	public void changePlayerIndex(){
+		playerIndex++;
+		playerIndex = playerIndex % NUMBER_PLAYERS;
 	}
-	
+    
 	//plays the game
 //	public void play() {
 //		update();
@@ -95,7 +101,7 @@ public class Game extends Thread{
 	//prints the game situation
 	public void update(){
 		System.out.println("\n current game situation: \n\n" + board.toString() + "\n");
-		
+		changePlayerIndex();
 	}
 	
 	//prints the result of the played game

@@ -49,7 +49,7 @@ public abstract class Player {
 	 * @param board
 	 * @return
 	 */
-	public abstract Index determineMove(Board board);
+	public abstract String determineMove(Board board);
 	
 	
 	public abstract String webMove(Board board);
@@ -58,17 +58,17 @@ public abstract class Player {
 	 * places a stone on the board
 	 * @param board
 	 */
-	public void makeMove(Board board){
-		if(passOrPlay(board)){
-			board.pass();
-		}else{
-			Index chosenIndex = determineMove(board);
-			board.blackPassed = false;
-			board.rightStage = true;
-			board.setStone(chosenIndex);
-			board.rightStage = false;
-		}
-		
-	}
+//	public void makeMove(Board board){
+//		if(passOrPlay(board)){
+//			board.pass();
+//		}else{
+//			Index chosenIndex = determineMove(board);
+//			board.blackPassed = false;
+//			board.rightStage = true;
+//			board.setStone(chosenIndex);
+//			board.rightStage = false;
+//		}
+//		
+//	}
 
 }
