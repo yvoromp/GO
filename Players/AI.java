@@ -3,7 +3,6 @@ package Players;
 import Strategy.FillBoardStrategy;
 import Strategy.Strategy;
 import goGame.Board;
-import goGame.Index;
 import goGame.Board.Status;
 
 public class AI extends Player{
@@ -28,7 +27,7 @@ public class AI extends Player{
 
 	}
 	
-	public Index determineMove(Board b){
+	public String determineMove(Board b){
 		return strategy.determineMove(b, this.getStone());
 	}
 

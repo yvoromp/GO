@@ -216,8 +216,8 @@ public class Server {
 		ClientHandler clientHandler2 = null;
 		System.out.println(pairedClients[0] + " playing with black");
 		System.out.println(pairedClients[1] + " playing with white");
-		Player player1 = Go.newWebPlayer(pairedClients[0], Status.BLACK, prefBoardSize);
-		Player player2 = Go.newWebPlayer(pairedClients[1], Status.WHITE, prefBoardSize);
+		Player player1 = Go.currentPlayer(pairedClients[0], Status.BLACK, prefBoardSize);
+		Player player2 = Go.currentPlayer(pairedClients[1], Status.WHITE, prefBoardSize);
 		Game game = new Game(player1, player2, prefBoardSize);
 		for(ClientHandler clientHandler : threads){
 			if(clientHandler.getClientName().equals(pairedClients[0])){

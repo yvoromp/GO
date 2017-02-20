@@ -168,6 +168,7 @@ public class ClientHandler extends Thread{
 					check.keyCancel(name, server, this);
 					break;
 				case MOVE:
+					server.sendToPairedClients(Key.CHAT + " Currentstone = " + currentStone, this);
 					check.keyMove(splited[1], splited[2], currentStone, server, this);
 					break;
 				case TABLEFLIP:

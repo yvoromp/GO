@@ -3,6 +3,8 @@ package Players;
 import goGame.Board.Status;
 
 import java.util.Scanner;
+
+import communication.ClientHandler.Key;
 import goGame.Board;
 import goGame.Index;
 
@@ -42,7 +44,7 @@ public class HumanPlayer extends Player{
 	/**
 	 * asks the human player where he/she likes to place his/her stone 
 	 */
-	public Index determineMove(Board board){
+	public String determineMove(Board board){
 		int x;
 		int y;
 		
@@ -53,7 +55,7 @@ public class HumanPlayer extends Player{
 		int positionY = readInt(prompt2);
 		y = positionY;
 		
-		boolean valid =  (board.isValidMove(x,y));
+		boolean valid =  (board.isValidMove(x,y,));
 		while(!valid) {
 			System.out.println("ERROR: position " + positionX + " , " + positionY + " is not a valid move");
 			String prompt3 = "*" + getName() +" playing with " + getStone().toString() + " : select x position";
@@ -65,8 +67,7 @@ public class HumanPlayer extends Player{
 			valid = (board.isValidMove(x,y));
 			
 			}
-		System.out.println("move" + " "+ x + " " + y);
-		return board.getPointAt(x,y);
+		return (Key.MOVE + " "+ x + " " + y);
 	}
 	
 	/**

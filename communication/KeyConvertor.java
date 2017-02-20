@@ -4,7 +4,8 @@ import communication.ClientHandler.Key;
 import goGame.Game;
 import goGame.Board.Status;
 import Players.Player;
-import Players.WebPlayer;
+//import Players.WebPlayer;
+import Players.HumanPlayer;
 
 public class KeyConvertor {
 	
@@ -18,12 +19,20 @@ public class KeyConvertor {
 			client.connected = false;
 		}
 		client.print("Opponent found!");
-		client.myTurn = status.equals("black");
+		//client.myTurn = status.equals("black");
 		client.stoneStatus = status;
 		client.print("You are playing with " + status);
-		Player player1 = new WebPlayer(client.name, Status.BLACK, validSize);
-		Player player2 = new WebPlayer(otherClientName, Status.WHITE, validSize);
-		client.game = new Game(player1,player2,validSize);
+		if(client.stoneStatus.equals("black")){
+			Player player1 = new HumanPlayer(client.name, Status.BLACK, validSize);
+			Player player2 = new HumanPlayer(otherClientName, Status.WHITE, validSize);
+			client.player = player1;
+			client.game = new Game(player1,player2,validSize);
+		}else{
+			Player player1 = new HumanPlayer(otherClientName, Status.BLACK, validSize);
+			Player player2 = new HumanPlayer(client.name, Status.WHITE, validSize);
+			client.player = player2;
+			client.game = new Game(player1,player2,validSize);
+		}
 		client.game.start();
 		client.gameStarted=true;
 	}
@@ -43,6 +52,8 @@ public class KeyConvertor {
 	}
 	
 	public void keyValid(Client client, String status, String xPos, String yPos){
+		client.print("client . stonestatus = " + client.stoneStatus);
+		client.print("status = " + status);
 		int x = 0;
 		int y = 0;
 		try{
@@ -53,14 +64,12 @@ public class KeyConvertor {
 			client.connected = false;
 		}
 		if(status.equals(client.stoneStatus)){
-			client.game.board.setStone(client.game.board.getPointAt(x,y));
+			client.game.board.setStone(client.game.board.getPointAt(x,y), client.stoneStatus);
 			client.game.update();
-			client.myTurn = false;
 			client.print("It's your opponents turn!");
 		}else{
-			client.game.board.setStone(client.game.board.getPointAt(x,y));
+			client.game.board.setStone(client.game.board.getPointAt(x,y), status);
 			client.game.update();
-			client.myTurn = true;
 			client.print("opponent made a move, your turn!");
 		}
 	}
@@ -146,12 +155,16 @@ public class KeyConvertor {
 	
 	
 	public void keyMove(String xPos, String yPos, Status myStone, Server server, ClientHandler clientHandler){
-		server.sendToPairedClients(" move detected !", clientHandler);
+		server.sendToPairedClients(Key.CHAT + " move detected !", clientHandler);
 		clientHandler.passCounter = 0;
+		String myStoneToString = (myStone.equals(Status.BLACK) ? "black" : "white");
 		int playerIndex = server.getGame(clientHandler).getPlayerIndex();
 		Status currentStone = (playerIndex == 0) ? Status.BLACK : Status.WHITE;
 		int x = -1;
 		int y = -1;
+		server.print("playerindex:  " + playerIndex);
+		server.print("currentStone:  " + currentStone.toString());
+		server.print("myStone:  " + myStone);
 		if(currentStone.equals(myStone)){
 			String stoneToString = clientHandler.statusToString(myStone);
 			try{
@@ -165,17 +178,13 @@ public class KeyConvertor {
 				server.kickClient(clientHandler);
 				server.sendToPairedClients(Key.END + " " + clientHandler.getClientName() + " " + "lost!", clientHandler);
 			}
-			if(server.getGame(clientHandler).board.isValidMove(x, y)){
-				server.getGame(clientHandler).board.setStone(server.getGame(clientHandler).board.getPointAt(x, y));
+			if(server.getGame(clientHandler).board.isValidMove(x, y, myStoneToString)){
+				server.getGame(clientHandler).board.setStone(server.getGame(clientHandler).board.getPointAt(x, y), myStoneToString);
+				server.getGame(clientHandler).update();
 				server.sendToPairedClients(Key.VALID + " " + stoneToString + " " + x + " " + y, clientHandler);
 				
 				if (myStone == Status.BLACK){
 					server.getGame(clientHandler).board.blackPassed = false;
-				}
-				else{
-					server.sendToPairedClients(Key.INVALID + " " + stoneToString + " invalid move!", clientHandler);
-					server.kickClient(clientHandler);
-					server.sendToPairedClients(Key.END + " " + clientHandler.getClientName() + " lost!", clientHandler);
 				}
 			}
 			else{

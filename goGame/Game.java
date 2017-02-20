@@ -13,8 +13,8 @@ public class Game extends Thread{
 	public int boardSize;
 	public Board board;
 	private HashMap	<String, Player> players;
-	private Player player1;
-	private Player player2;
+	public Player player1;
+	public Player player2;
 	public int playerIndex;
 	public static HashSet <String> oldGamePositions;
 	public static int passedBefore = 0;
@@ -36,7 +36,6 @@ public class Game extends Thread{
 		players.put(s0.getName(), s0);
 		players.put(s1.getName(), s1);
 		playerIndex = 0;
-		//play();
 		
 	}
 	
@@ -121,19 +120,19 @@ public class Game extends Thread{
 	public HashMap<String, Player> getPlayers(){
 		return this.players;
 	}	
-	public void moveMyStone(String Xpos, String yPos, Client client){
-	try{
-		int x = Integer.parseInt(Xpos);
-		int y = Integer.parseInt(yPos);
-		if(board.isValidMove(x, y)){
-			board.setStone(board.getPointAt(x, y));
-			client.sendText(Key.MOVE + " " +x + " " +y);
-		}else{
-			client.print("invalid move man, please enter a valid move");
-		}
-	}catch (NumberFormatException e){
-		client.print("what are you doing? that shit ain't integers");
-	}
-}
+//	public void moveMyStone(String Xpos, String yPos, Client client){
+//	try{
+//		int x = Integer.parseInt(Xpos);
+//		int y = Integer.parseInt(yPos);
+//		if(board.isValidMove(x, y)){
+//			board.setStone(board.getPointAt(x, y), );
+//			client.sendText(Key.MOVE + " " +x + " " +y);
+//		}else{
+//			client.print("invalid move man, please enter a valid move");
+//		}
+//	}catch (NumberFormatException e){
+//		client.print("what are you doing? that shit ain't integers");
+//	}
+//}
 
 }

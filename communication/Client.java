@@ -65,6 +65,7 @@ public class Client extends Thread{
 
 	protected String name;
 	public String stoneStatus;
+	public Player player;
 	private Socket socket;
 	private BufferedReader in;
 	private BufferedWriter out;
@@ -106,16 +107,16 @@ public class Client extends Thread{
 		while(connected){
 			try{
 				readServerInput();
+				boolean myTurn = game.getCurrentPlayer().equals(player) ? true : false;
 				while(myTurn && gameStarted){
 					print("the while loop is activated");
 					Player myPlayer = game.getCurrentPlayer();
 					String chosenCoordinates = myPlayer.determineMove(game.board);
 					print("send: " + chosenCoordinates);
 					sendText(chosenCoordinates);
-					myTurn = !myTurn;
 				}
 			}catch(NullPointerException e){
-				print("can't read the server input");
+				e.printStackTrace();
 			}
 		}
 	}
@@ -179,7 +180,7 @@ public class Client extends Thread{
 		String serverInput = "";
 		KeyConvertor convert = new KeyConvertor();
 		try{
-			while((serverInput = in.readLine()) != null){
+			while((serverInput = (in.readLine())) != null){
 				String[] splited = serverInput.split(" ");
 				Key key = Key.valueOf(splited[0]);
 				switch (key){

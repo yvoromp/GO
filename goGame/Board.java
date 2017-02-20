@@ -12,7 +12,7 @@ public class Board {
 	public enum Status{
 		BLACK, WHITE, NONE
 	}
-	
+
 	public static int DIM;
 	public Index lastMove;
 	public boolean deadStone;
@@ -28,19 +28,19 @@ public class Board {
 	public boolean isWhiteArea = false;
 	public boolean rightStage = false;
 
-	
-	
+
+
 
 	public Board(int boardSize){
 		DIM = boardSize;
 		reset(DIM);
 	}
-	
+
 	// method for changing  betweenplayers
 	public void changePlayer(){
 		isBlack = !isBlack;
 	}
-	
+
 	//pass, inlcuding passrule
 	public void pass(){
 		if( !isBlack && blackPassed){
@@ -52,10 +52,10 @@ public class Board {
 		if(isBlack){
 			blackPassed = true;
 		}
-		
-		
+
+
 	}
-	
+
 	//puts current boardstate into list
 	public void savePositions(){
 		allPositions = "";
@@ -68,7 +68,7 @@ public class Board {
 		oldPositions.add(allPositions);
 
 	}
-		
+
 	/**
 	 * returns the status of index i
 	 * @param i
@@ -77,11 +77,11 @@ public class Board {
 	public Status getStatus(Index i){
 		Status position = stones.get(i);
 		return position;
-		}
-	
-//	public Status getStatus(int x, int y) {
-//		return (stones.get(getPointAt(x, y)));
-//	}
+	}
+
+	//	public Status getStatus(int x, int y) {
+	//		return (stones.get(getPointAt(x, y)));
+	//	}
 
 	/**
 	 * checks if the index is empty
@@ -91,12 +91,12 @@ public class Board {
 	public boolean isEmpty(Index i){
 		return (stones.get(i) == Status.NONE);
 	}
-	
-	
+
+
 	public Index getLastMove(){
 		return lastMove;
 	}
-	
+
 	public Index getPointAt(int x, int y){
 		for (Index index : stones.keySet()) {
 			if (index.getX() == x && index.getY() == y) {
@@ -105,7 +105,7 @@ public class Board {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * checks for suicide
 	 * @param i
@@ -140,23 +140,24 @@ public class Board {
 	 * @param y
 	 * @return
 	 */
-	public boolean isValidMove(int x, int y){
+	public boolean isValidMove(int x, int y, String status){
+		//Status nowPlaying = (status.equals("black") ? Status.BLACK : Status.WHITE);
 		if ( x < 0 || y < 0 || x > DIM -1 || y > DIM - 1){
 			return false;
 		}
-		
+
 		if (stones.get(getPointAt(x,y)) != Status.NONE){
 			System.out.println(" position1");
 			return false;
 		}
 		Index stone = getPointAt(x,y);
-		setStone(stone);
+		setStone(stone, status);
 		if(getStatus(stone) == Status.NONE){
 			stones.put(stone, Status.NONE);
 			System.out.println(" position2");
 			return false;
 		}
-		
+
 		oldPositions = new HashSet <String>();
 		String s = "";
 		for (int i = 0; i < DIM; i++) {
@@ -182,12 +183,12 @@ public class Board {
 		return true;
 	}
 
-	
+
 	//checks if the game is over
 	public boolean gameOver(){
 		int count = 0;
 		boolean gameOver = false;
-		
+
 		//checks for full board (no emptySpaces)
 		for (int i = 0; i < DIM; i++) {
 			for (int j = 0; j < DIM; j++) {	
@@ -214,23 +215,23 @@ public class Board {
 	 * @return
 	 */
 	public boolean isNoneArea (Index i, Set<Index> checkedPoints) {
-        for (Index neighbor : getNeighbors(i)) {
-            if (getStatus(neighbor) == Status.BLACK) {
-                isBlackArea = true;
-            }
-            if (getStatus(neighbor) == Status.WHITE) {
-                isWhiteArea = true;
-            }
-            if (getStatus(neighbor) == Status.NONE && !checkedPoints.contains(neighbor)) {
-                checkedPoints.add(neighbor);
-                if (!isNoneArea(neighbor, checkedPoints)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-	
+		for (Index neighbor : getNeighbors(i)) {
+			if (getStatus(neighbor) == Status.BLACK) {
+				isBlackArea = true;
+			}
+			if (getStatus(neighbor) == Status.WHITE) {
+				isWhiteArea = true;
+			}
+			if (getStatus(neighbor) == Status.NONE && !checkedPoints.contains(neighbor)) {
+				checkedPoints.add(neighbor);
+				if (!isNoneArea(neighbor, checkedPoints)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
 
 	// counts the score at the end of the game
 	public String totalScore(){
@@ -259,7 +260,7 @@ public class Board {
 								checkedPoints.add(neighbor);
 							}
 						}
-						
+
 					}
 				}
 				if(isBlackArea && !isWhiteArea){
@@ -277,29 +278,29 @@ public class Board {
 		return "EINDSCORE: Black scores " + blackStoneCounter + " and White scores " + whiteStoneCounter;
 	}
 
-	
+
 	//returns a String representation of the player
 	public String toString() {
 		String s = "";
 		for (int i = 0; i < DIM; i++) {
 			String visualRow = "";
 			for (int j = 0; j < DIM; j++) {	
-			visualRow = visualRow + "    " + stones.get(getPointAt(i,j)) + "    ";
-				
-			if (j < DIM - 1) {
-				visualRow = visualRow + "|";
+				visualRow = visualRow + "    " + stones.get(getPointAt(i,j)) + "    ";
+
+				if (j < DIM - 1) {
+					visualRow = visualRow + "|";
 				}
 			}
-				s = s + visualRow ;
-				if (i < DIM - 1) {
-					s = s + "\n" + "\n";
-				}
+			s = s + visualRow ;
+			if (i < DIM - 1) {
+				s = s + "\n" + "\n";
+			}
 		}
 
 		return s;
-		
+
 	}
-	
+
 	//resets all the fields to empty
 	public void reset(int boardSize){
 		stones = new HashMap<Index, Status>();
@@ -310,12 +311,12 @@ public class Board {
 				Index index = new Index(i , j);
 				stones.put(index, Status.NONE);
 				//System.out.println("The first index position has status:  " + stones.get(index));
-				
+
 			}
-			
+
 		}
 	}	
-	
+
 	//checks if stone should be removed
 	public boolean isDead(Index i, Set<Index> checkedStones){
 		for (Index neighbor : getNeighbors(i)){
@@ -331,7 +332,7 @@ public class Board {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * gets the  positions surrounding stones
 	 * @param i
@@ -339,7 +340,7 @@ public class Board {
 	 */
 	public Set<Index> getNeighbors(Index i){
 		Set<Index> neighbors = new HashSet<>();
-		
+
 		if( i.getX() > 0){
 			neighbors.add(getPointAt(i.getX() - 1, i.getY()));
 		}
@@ -354,31 +355,25 @@ public class Board {
 		}
 		return neighbors;
 	}
-	
-	
+
+
 	/**
 	 * places the stone on the board
 	 * @param i
 	 */
-	public void setStone(Index i){
-		Status s;
-		
-		if(isBlack){
-			s = Status.BLACK;
-		}else{
-			s = Status.WHITE;
-		}
-		stones.put(i, s);
-		
+	public void setStone(Index i, String status){
+		Status nowPlaying = (status.equals("black") ? Status.BLACK : Status.WHITE);
+		stones.put(i, nowPlaying);
+
 		for( Index neighbor : getNeighbors(i)){
 			boolean sameColorAsPlacedStone = false;
 			if(getStatus(neighbor) == getStatus(i)){
 				sameColorAsPlacedStone = true;
 			}
-//			if(rightStage){
-//				removeIfDeadStone(neighbor);
-//			}
-			
+			//			if(rightStage){
+			//				removeIfDeadStone(neighbor);
+			//			}
+
 			Set<Index> checkedNeighborStones = new HashSet<>();
 			checkedNeighborStones.add(i);
 			if(isDead(i, checkedNeighborStones)){
@@ -388,16 +383,16 @@ public class Board {
 				//System.out.println("SS2");
 				stones.put(i, Status.NONE);
 			}
-			if(isHarakiri(i,s)){
+			if(isHarakiri(i,nowPlaying)){
 				//System.out.println("SS3");
 				stones.put(i, Status.NONE);
 			}
-			
+
 
 		}
-		
+
 	}
-	
+
 	/**
 	 * removes enclosed stones
 	 * @param i
@@ -410,12 +405,12 @@ public class Board {
 				deadStone = true;
 			}
 			for(Index deadStones : checkedStones){
-					stones.put(deadStones, Status.NONE);
-				}
-				
+				stones.put(deadStones, Status.NONE);
 			}
+
+		}
 	}
-	
+
 	/**
 	 * advises on placement (is it a good place?)
 	 * @param i
@@ -429,7 +424,7 @@ public class Board {
 		}else{
 			s = Status.WHITE;
 		}
-		
+
 		for( Index neighbor : getNeighbors(i)){										//look at all the neighbors
 			boolean sameColorAsPlacedStone = false;	
 			stones.put(i, s);
@@ -444,7 +439,7 @@ public class Board {
 		}
 		stones.put(i, Status.NONE);	
 		return noGood;
-		
+
 	}
-	
+
 }
