@@ -233,11 +233,10 @@ public class Server {
 		clientHandler2.sendCommandText(Key.READY + " " + "white" + " " + clientHandler1.getClientName() + " " + prefBoardSize);
 		addNewGame(game, clientHandler1, clientHandler2);
 		sendToPairedClients(Key.CHAT + " u bent gepaired, uw spel begint!", clientHandler1);
-		sendAll(Key.CHAT + " " +"new game started between " + clientHandler1.getClientName() + " and " + clientHandler2.getClientName());
 		game.start();
 		removeFromWaitingList(pairedClients[0]);
 		removeFromWaitingList(pairedClients[1]);
-
+		//sendAll(Key.CHAT + " " +"new game started between " + clientHandler1.getClientName() + " and " + clientHandler2.getClientName());
 
 	}
 }

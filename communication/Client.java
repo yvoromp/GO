@@ -53,9 +53,35 @@ public class Client extends Thread{
 			client.sendText(Key.PLAYER + " " + clientName);
 			keyBoardInput clientKeyBoardInput = new keyBoardInput();
 			client.start();
-			while (true){
-				clientKeyBoardInput.inputByKeyboard(client);
 
+			if(clientName.equals("yvo") || clientName.equals("human")){
+				clientKeyBoardInput.inputByKeyboard(client);
+			}else{
+				String send =readText("");
+				client.sendText(send);
+			}
+
+			while(true){
+				try{
+					while(client.socket.isConnected()){
+
+						if(client.gameStarted){
+							boolean myTurn = client.game.getCurrentPlayer().equals(client.player) ? true : false;
+							if(myTurn){
+								client.print("the while loop is activated");
+								Player myPlayer = client.game.getCurrentPlayer();
+								String chosenCoordinates = myPlayer.determineMove(client.game.board);
+								client.print("send: " + chosenCoordinates);
+								client.sendText(chosenCoordinates);
+								myTurn = !myTurn;
+							}
+
+						}
+					}
+
+				}catch (NullPointerException e) {
+					e.printStackTrace();
+				}
 			}
 		}catch(IOException e){
 			System.out.println("creating client object failed!");
@@ -107,14 +133,6 @@ public class Client extends Thread{
 		while(connected){
 			try{
 				readServerInput();
-				boolean myTurn = game.getCurrentPlayer().equals(player) ? true : false;
-				while(myTurn && gameStarted){
-					print("the while loop is activated");
-					Player myPlayer = game.getCurrentPlayer();
-					String chosenCoordinates = myPlayer.determineMove(game.board);
-					print("send: " + chosenCoordinates);
-					sendText(chosenCoordinates);
-				}
 			}catch(NullPointerException e){
 				e.printStackTrace();
 			}
@@ -165,7 +183,7 @@ public class Client extends Thread{
 		}
 		return (answer == null) ? "" : answer;
 	}
-	
+
 	/**
 	 * takes input form terminal and prints it or sends it to clientHandlerclass
 	 * @param client

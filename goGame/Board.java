@@ -66,7 +66,7 @@ public class Board {
 			}
 		}
 		oldPositions.add(allPositions);
-
+		Game.oldGamePositions.add(allPositions);
 	}
 
 	/**
@@ -150,10 +150,11 @@ public class Board {
 			System.out.println(" position1");
 			return false;
 		}
-		Index stone = getPointAt(x,y);
-		setStone(stone, status);
-		if(getStatus(stone) == Status.NONE){
-			stones.put(stone, Status.NONE);
+		Index position = getPointAt(x,y);
+		setStone(position, status);
+		System.out.println("index position given :" + getStatus(getPointAt(x,y)));
+		if(getStatus(position) == Status.NONE){
+			stones.put(position, Status.NONE);
 			System.out.println(" position2");
 			return false;
 		}
@@ -163,7 +164,7 @@ public class Board {
 		for (int i = 0; i < DIM; i++) {
 			String visual = "";
 			for (int j = 0; j < DIM; j++) {	
-				visual = visual + stones.get(stone);	
+				visual = visual + stones.get(getPointAt(i,j));	
 			}
 			s = s + visual ;
 		}
@@ -173,13 +174,13 @@ public class Board {
 			if(string.contains(allPositions)){
 				System.out.println("position has occured before, voilation of KO rule");
 				allPositions = "";
-				stones.put(stone, Status.NONE);
+				stones.put(position, Status.NONE);
 				return false;
 			}
 		}
 		savePositions();
-		stones.put(stone, Status.NONE);
-		lastMove = stone;
+		stones.put(position, Status.NONE);
+		lastMove = position;
 		return true;
 	}
 
@@ -370,21 +371,24 @@ public class Board {
 			if(getStatus(neighbor) == getStatus(i)){
 				sameColorAsPlacedStone = true;
 			}
-			//			if(rightStage){
-			//				removeIfDeadStone(neighbor);
-			//			}
 
 			Set<Index> checkedNeighborStones = new HashSet<>();
 			checkedNeighborStones.add(i);
 			if(isDead(i, checkedNeighborStones)){
+				System.out.println("SS1");
 				stones.put(i, Status.NONE);
 			}
 			if(getStatus(neighbor) == Status.NONE && sameColorAsPlacedStone){
-				//System.out.println("SS2");
+				System.out.println("SS2");
 				stones.put(i, Status.NONE);
 			}
 			if(isHarakiri(i,nowPlaying)){
-				//System.out.println("SS3");
+				System.out.println("SS3");
+				stones.put(i, nowPlaying);
+			}
+			removeIfDeadStone(neighbor);
+			if(isDead(i, checkedNeighborStones)){
+				System.out.println("SS1");
 				stones.put(i, Status.NONE);
 			}
 

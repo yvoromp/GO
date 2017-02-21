@@ -67,9 +67,9 @@ public class WebPlayer extends Player{
 			}catch (NumberFormatException e){
 				System.out.println("2nd and 3rd inputs should be integers");
 			}
-			if(board.isValidMove(x,y,this.status)){
+			if(board.isValidMove(x,y,statusString)){
 				System.out.println("you made a move");
-				board.setStone(board.getPointAt(x, y,this.status));
+				board.setStone(board.getPointAt(x, y),statusString);
 				s = (Key.MOVE + " " + x + " " + y);
 				return s;
 					//break;

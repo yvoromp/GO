@@ -112,7 +112,6 @@ public class ClientHandler extends Thread{
 	}
 
 	public boolean isInput(){
-		validInput = "";
 		boolean valid = false;
 		try{
 			valid = ((validInput = in.readLine()) != null) ? true : false;

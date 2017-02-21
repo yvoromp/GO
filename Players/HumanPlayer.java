@@ -9,7 +9,8 @@ import goGame.Board;
 import goGame.Index;
 
 public class HumanPlayer extends Player{
-
+	
+	private String status;
 	
 	/**
 	 * creates a human player instance
@@ -19,6 +20,7 @@ public class HumanPlayer extends Player{
 	 */
 	public HumanPlayer(String name, Status status, int boardSize){
 		super(name, status, boardSize);
+		this.status = (status.equals(Status.BLACK) ? "black" : "white");
 	}
 	
 	/**
@@ -55,7 +57,7 @@ public class HumanPlayer extends Player{
 		int positionY = readInt(prompt2);
 		y = positionY;
 		
-		boolean valid =  (board.isValidMove(x,y,));
+		boolean valid =  (board.isValidMove(x,y,status));
 		while(!valid) {
 			System.out.println("ERROR: position " + positionX + " , " + positionY + " is not a valid move");
 			String prompt3 = "*" + getName() +" playing with " + getStone().toString() + " : select x position";
@@ -64,7 +66,7 @@ public class HumanPlayer extends Player{
 			String prompt4 = "*" + getName() +" playing with " + getStone().toString() + " : select y position";
 			int positionY2 = readInt(prompt4);
 			y = positionY2;
-			valid = (board.isValidMove(x,y));
+			valid = (board.isValidMove(x,y,status));
 			
 			}
 		return (Key.MOVE + " "+ x + " " + y);

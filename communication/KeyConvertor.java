@@ -35,6 +35,8 @@ public class KeyConvertor {
 		}
 		client.game.start();
 		client.gameStarted=true;
+		client.print("gamestarted: " + client.gameStarted);
+		
 	}
 
 
@@ -54,6 +56,7 @@ public class KeyConvertor {
 	public void keyValid(Client client, String status, String xPos, String yPos){
 		client.print("client . stonestatus = " + client.stoneStatus);
 		client.print("status = " + status);
+		client.print("KC client myTurn =  " + client.myTurn);
 		int x = 0;
 		int y = 0;
 		try{
@@ -67,10 +70,16 @@ public class KeyConvertor {
 			client.game.board.setStone(client.game.board.getPointAt(x,y), client.stoneStatus);
 			client.game.update();
 			client.print("It's your opponents turn!");
+			boolean myTurn = client.game.getCurrentPlayer().equals(client.player) ? true : false;
+			client.print("myturn after valid is: " + myTurn );
+			client.print("gamestarted after valid is: " + client.gameStarted);
 		}else{
 			client.game.board.setStone(client.game.board.getPointAt(x,y), status);
 			client.game.update();
 			client.print("opponent made a move, your turn!");
+			boolean myTurn = client.game.getCurrentPlayer().equals(client.player) ? true : false;
+			client.print("myturn after valid is: " + myTurn );
+			client.print("gamestarted after valid is: " + client.gameStarted);
 		}
 	}
 	
