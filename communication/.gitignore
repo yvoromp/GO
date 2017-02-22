@@ -7,3 +7,5 @@
 /ClientHandler.class
 /KeyConvertor.class
 /keyBoardInput.class
+/ThreadTurnBase.class
+/ThreadConnected.class
