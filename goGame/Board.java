@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+
 /*
  * The Chinese game GO
  */
@@ -36,6 +37,13 @@ public class Board {
 		reset(DIM);
 	}
 
+	//deepcopy for valid move
+	public HashMap<Index, Status> deepCopy() {
+		HashMap <Index, Status> HashMapCopy = new HashMap<Index, Status>(stones);
+		return HashMapCopy;
+	}
+
+
 	// method for changing  betweenplayers
 	public void changePlayer(){
 		isBlack = !isBlack;
@@ -58,6 +66,7 @@ public class Board {
 
 	//puts current boardstate into list
 	public void savePositions(){
+		oldPositions = new HashSet <String>();
 		allPositions = "";
 		for(int i = 0; i < DIM; i++){
 			for(int j = 0; j < DIM; j++){
@@ -133,6 +142,31 @@ public class Board {
 		return harakiri;
 
 	}
+	public boolean isKo(Index index, String status){
+		Status nowPlaying = (status.equals("black") ? Status.BLACK : Status.WHITE);
+		HashMap <Index, Status> stonesCopy = deepCopy();
+		stones.put(index, nowPlaying);
+		
+		String s = "";
+		for (int i = 0; i < DIM; i++) {
+			String visual = "";
+			for (int j = 0; j < DIM; j++) {	
+				visual = visual + stones.get(getPointAt(i,j));	
+			}
+			s = s + visual;
+		}
+		String currentBoard = s;
+		for(String string : Game.oldGamePositions){
+			if(string.equals(currentBoard)){
+				System.out.println("position has occured before, voilation of KO rule");
+				allPositions = "";
+				stones.put(index, Status.NONE);
+				return true;
+			}
+		}
+		stones.put(index, Status.NONE);
+		return false;
+	}
 
 	/**
 	 * chekcs if a move is valid
@@ -141,7 +175,7 @@ public class Board {
 	 * @return
 	 */
 	public boolean isValidMove(int x, int y, String status){
-		//Status nowPlaying = (status.equals("black") ? Status.BLACK : Status.WHITE);
+		Status nowPlaying = (status.equals("black") ? Status.BLACK : Status.WHITE);
 		if ( x < 0 || y < 0 || x > DIM -1 || y > DIM - 1){
 			return false;
 		}
@@ -151,35 +185,13 @@ public class Board {
 			return false;
 		}
 		Index position = getPointAt(x,y);
-		setStone(position, status);
-		System.out.println("index position given :" + getStatus(getPointAt(x,y)));
-		if(getStatus(position) == Status.NONE){
-			stones.put(position, Status.NONE);
-			System.out.println(" position2");
+		Status formerStatus = stones.get(getPointAt(x,y));
+		tryStone(position, status);
+		
+		if (isKo(position, status)){
 			return false;
 		}
-
-		oldPositions = new HashSet <String>();
-		String s = "";
-		for (int i = 0; i < DIM; i++) {
-			String visual = "";
-			for (int j = 0; j < DIM; j++) {	
-				visual = visual + stones.get(getPointAt(i,j));	
-			}
-			s = s + visual ;
-		}
-		allPositions = s;
-
-		for(String string : Game.oldGamePositions){
-			if(string.contains(allPositions)){
-				System.out.println("position has occured before, voilation of KO rule");
-				allPositions = "";
-				stones.put(position, Status.NONE);
-				return false;
-			}
-		}
-		savePositions();
-		stones.put(position, Status.NONE);
+		removeIfDeadStone(position);
 		lastMove = position;
 		return true;
 	}
@@ -276,7 +288,7 @@ public class Board {
 		}
 		this.blackStoneCounter = blackStoneCounter;
 		this.whiteStoneCounter = whiteStoneCounter;
-		return "EINDSCORE: Black scores " + blackStoneCounter + " and White scores " + whiteStoneCounter;
+		return "CHAT EINDSCORE: Black scores " + blackStoneCounter + " and White scores " + whiteStoneCounter;
 	}
 
 
@@ -304,6 +316,7 @@ public class Board {
 
 	//resets all the fields to empty
 	public void reset(int boardSize){
+		Game.oldGamePositions = new HashSet<String>();
 		stones = new HashMap<Index, Status>();
 		DIM = boardSize;
 		System.out.println(DIM + "   :  is the DIM value ");
@@ -365,6 +378,7 @@ public class Board {
 	public void setStone(Index i, String status){
 		Status nowPlaying = (status.equals("black") ? Status.BLACK : Status.WHITE);
 		stones.put(i, nowPlaying);
+		savePositions();
 
 		for( Index neighbor : getNeighbors(i)){
 			boolean sameColorAsPlacedStone = false;
@@ -374,29 +388,28 @@ public class Board {
 
 			Set<Index> checkedNeighborStones = new HashSet<>();
 			checkedNeighborStones.add(i);
-			if(isDead(i, checkedNeighborStones)){
-				System.out.println("SS1");
-				stones.put(i, Status.NONE);
-			}
 			if(getStatus(neighbor) == Status.NONE && sameColorAsPlacedStone){
-				System.out.println("SS2");
-				stones.put(i, Status.NONE);
+				//System.out.println("SS2");
+				stones.put(i, nowPlaying);
 			}
 			if(isHarakiri(i,nowPlaying)){
-				System.out.println("SS3");
+				//System.out.println("SS3");
 				stones.put(i, nowPlaying);
 			}
 			removeIfDeadStone(neighbor);
-			if(isDead(i, checkedNeighborStones)){
-				System.out.println("SS1");
-				stones.put(i, Status.NONE);
-			}
-
-
+		}
+		Set<Index> checkedNeighborStones = new HashSet<>();
+		if(isDead(i, checkedNeighborStones)){
+			//System.out.println("SS1");
+			stones.put(i, Status.NONE);
 		}
 
 	}
 
+	public void tryStone(Index i, String status){
+		Status nowPlaying = (status.equals("black") ? Status.BLACK : Status.WHITE);
+		stones.put(i, nowPlaying);
+	}
 	/**
 	 * removes enclosed stones
 	 * @param i
@@ -420,18 +433,14 @@ public class Board {
 	 * @param i
 	 * @return
 	 */
-	public boolean isPlacementNoGood(Index i){
+	public boolean isPlacementNoGood(Index i, String status){
+		Status stoneStatus = status.equals("black") ? Status.BLACK : Status.WHITE;
+		//true is bad placement
 		boolean noGood = false;
-		Status s;
-		if(isBlack){
-			s = Status.BLACK;
-		}else{
-			s = Status.WHITE;
-		}
+		stones.put(i, stoneStatus);
 
 		for( Index neighbor : getNeighbors(i)){										//look at all the neighbors
 			boolean sameColorAsPlacedStone = false;	
-			stones.put(i, s);
 			if(getStatus(neighbor) == getStatus(i)){								//if status is the same
 				sameColorAsPlacedStone = true;										//change boolean to true
 			}

@@ -18,6 +18,7 @@ public class Game extends Thread{
 	public int playerIndex;
 	public static HashSet <String> oldGamePositions;
 	public static int passedBefore = 0;
+	public int passcounter;
 	
 	/**
 	 * creates a new game
@@ -36,6 +37,7 @@ public class Game extends Thread{
 		players.put(s0.getName(), s0);
 		players.put(s1.getName(), s1);
 		playerIndex = 0;
+		passcounter = 0;
 		
 	}
 	
@@ -101,6 +103,7 @@ public class Game extends Thread{
 	//prints the game situation
 	public void update(){
 		System.out.println("\n current game situation: \n\n" + board.toString() + "\n");
+		board.savePositions();
 		changePlayerIndex();
 	}
 	

@@ -8,10 +8,12 @@ import goGame.Board.Status;
 public class AI extends Player{
 	
 	private Strategy strategy;
+	private String status;
 	
-	public AI (Status s, Strategy strategy, int boardSize) {
-		super(strategy.getName() + " - " + s.toString(), s, boardSize);
-		this.strategy = strategy;
+	public AI (String name, Status s, int boardSize) {
+		super(name,s,boardSize);
+		strategy = new FillBoardStrategy();
+		this.status = (s.equals(Status.BLACK) ? "black" : "white");
 	}
 	
 	public boolean passOrPlay(Board b){
