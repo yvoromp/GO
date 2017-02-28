@@ -50,15 +50,17 @@ public class Client extends Thread{
 			String clientName = readText("fill in your name");
 			Client client = new Client(clientName, gameServerAddress, port);
 			client.sendText(Key.PLAYER + " " + clientName);
-			keyBoardInput clientKeyBoardInput = new keyBoardInput();
+			ThreadKeyBoardInput clientKeyBoardInput = new ThreadKeyBoardInput();
+			clientKeyBoardInput.client = client;
+			clientKeyBoardInput.start();
 			client.start();
 
-			if(clientName.equals("yvo") || clientName.equals("human")){
-				clientKeyBoardInput.inputByKeyboard(client);
-			}else{
-				String send =readText("");
-				client.sendText(send);
-			}
+//			if(clientName.equals("robot") || clientName.equals("machine")){
+//				clientKeyBoardInput.inputByKeyboard(client);
+//			}else{
+//				String send =readText("");
+//				client.sendText(send);
+//			}
 
 			//make thread and notify when connection is made
 			ThreadConnected connected = new ThreadConnected();
@@ -225,6 +227,10 @@ public void readServerInput(){
 			case PLAYER:
 				name = splited[1];
 				break;
+			case CHAT:
+				String[] splitedChat = serverInput.split(" ", 2);
+				print(splitedChat[1]);				
+				break;
 			default:
 				print(serverInput);
 				break;
@@ -233,7 +239,7 @@ public void readServerInput(){
 	}catch (IOException e){
 		print("can't read the input from server");
 	}catch (IllegalArgumentException e){
-		e.printStackTrace();
+		print("there is no keyword present");
 	}
 }
 

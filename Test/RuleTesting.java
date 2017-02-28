@@ -29,14 +29,18 @@ public class RuleTesting {
 		//surround 0,0 (white) with black
 		board.isValidMove(1, 0, "black");
 		board.setStone(board.getPointAt(1,0),"black");
+		assertEquals(Status.BLACK, board.stones.get(board.getPointAt(1,0)));
 		assertEquals(Status.BLACK, board.getStatus(board.getPointAt(1,0)));
 		board.isValidMove(0, 0, "white");
 		board.setStone(board.getPointAt(0,0),"white");
 		board.isValidMove(0, 1, "black");
 		board.setStone(board.getPointAt(0,1),"black");
 		assertEquals(Status.NONE, board.getStatus(board.getPointAt(0,0)));
+		assertEquals(Status.NONE, board.stones.get(board.getPointAt(0,0)));
 		assertEquals(Status.BLACK, board.getStatus(board.getPointAt(0,1)));
+		assertEquals(Status.BLACK, board.stones.get(board.getPointAt(0,1)));
 		assertEquals(Status.BLACK, board.getStatus(board.getPointAt(1,0)));
+		assertEquals(Status.BLACK, board.stones.get(board.getPointAt(1,0)));
 
 		//surround 4,0 (white) with black
 		board.isValidMove(3, 0, "black");
@@ -288,6 +292,7 @@ public class RuleTesting {
 		board.isValidMove(1, 3, "white");
 		board.setStone(board.getPointAt(1,3),"white");
 		//prepare black
+		System.out.println(board.toString() + " /n");
 		board.isValidMove(2, 1, "black");
 		board.setStone(board.getPointAt(2,1),"black");
 		board.isValidMove(2, 3, "black");
@@ -295,10 +300,13 @@ public class RuleTesting {
 		board.isValidMove(3, 2, "black");
 		board.setStone(board.getPointAt(3,2),"black");
 		//place 2,2 white (valid)
+		System.out.println(board.toString() + " /n");
 		assertTrue(board.isValidMove(2, 2, "white"));
 		board.isValidMove(2, 2, "white");
 		board.setStone(board.getPointAt(2,2),"white");
 		//places 1,2 black (valid)
+		System.out.println(board.toString() + " /n");
+		assertEquals(Status.NONE, board.getStatus(board.getPointAt(1,2)));
 		assertTrue(board.isValidMove(1, 2, "black"));
 		board.isValidMove(1, 2, "black");
 		board.setStone(board.getPointAt(1,2),"black");

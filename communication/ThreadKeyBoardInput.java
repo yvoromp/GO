@@ -7,11 +7,15 @@ import java.io.InputStreamReader;
 import communication.ClientHandler.Key;
 
 
-public class keyBoardInput {
+public class ThreadKeyBoardInput extends Thread{
 
 	private String validKeyboardInput;
-	
+	protected Client client;
 
+	public void run(){
+		inputByKeyboard(client);
+	}
+	
 	public boolean isKeyboardInput(Client client){
 		BufferedReader k = new BufferedReader(new InputStreamReader(System.in));
 		boolean valid = false;

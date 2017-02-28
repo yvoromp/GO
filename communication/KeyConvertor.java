@@ -5,7 +5,7 @@ import goGame.Game;
 import goGame.Board.Status;
 import Players.Player;
 //import Players.WebPlayer;
-import Players.HumanPlayer;
+import Players.AI;
 
 public class KeyConvertor {
 	
@@ -23,15 +23,15 @@ public class KeyConvertor {
 		client.stoneStatus = status;
 		client.print("You are playing with " + status);
 		if(client.stoneStatus.equals("black")){
-			Player player1 = new HumanPlayer(client.name, Status.BLACK, validSize);
-			Player player2 = new HumanPlayer(otherClientName, Status.WHITE, validSize);
+			Player player1 = new AI(client.name, Status.BLACK, validSize);
+			Player player2 = new AI(otherClientName, Status.WHITE, validSize);
 			client.player = player1;
 			client.myTurn = true;
 			client.print("init myTurn : " + client.myTurn);
 			client.game = new Game(player1,player2,validSize);
 		}else{
-			Player player1 = new HumanPlayer(otherClientName, Status.BLACK, validSize);
-			Player player2 = new HumanPlayer(client.name, Status.WHITE, validSize);
+			Player player1 = new AI(otherClientName, Status.BLACK, validSize);
+			Player player2 = new AI(client.name, Status.WHITE, validSize);
 			client.player = player2;
 			client.myTurn = false;
 			client.print("init myTurn : " + client.myTurn);
@@ -139,15 +139,23 @@ public class KeyConvertor {
 			score1 = Integer.parseInt(scorePlayer1);
 			score2 = Integer.parseInt(scorePlayer2);
 		}catch(NumberFormatException e){
-			client.print("score doesn't translate to numbers");
+			client.print(Key.CHAT + " " + "score doesn't translate to numbers");
 		}
 		if(score1 < score2){
-			client.print("white won: " + score1 + " : " + score2);
+			client.print(Key.CHAT + " " + "white won: " + score1 + " : " + score2);
 		}else if(score1 > score2){
-			client.print("black won: " + score1 + " : " + score2);
+			client.print(Key.CHAT + " " + "black won: " + score1 + " : " + score2);
 		}else{
-			client.print("there's a draw " + score1 + " : " + score2);
+			client.print(Key.CHAT + " " + "there's a draw " + score1 + " : " + score2);
 		}
+		client.print(Key.CHAT + " " + "another game starts in 10 seconds, type EXIT to leave");
+		try{
+			Thread.sleep(10000);
+		}catch (InterruptedException e){
+			client.print(Key.CHAT + " " + "new game started");
+		}
+	
+		client.game.board.reset(client.game.boardSize);
 	}
 	
 	
@@ -172,18 +180,23 @@ public class KeyConvertor {
 
 	public void keyTableFlip(Status status, Server server, ClientHandler clientHandler){
 		String stonestate = (status == Status.BLACK) ? "black" : "white";
-		server.sendToPairedClients(Key.TABLEFLIPPED + " " + stonestate, clientHandler);
-		server.sendToPairedClients(Key.END + " " + clientHandler.getClientName() + " lost!", clientHandler);
+		server.sendToPairedClients(Key.TABLEFLIPPED + " " + stonestate, clientHandler, server);
+		server.sendToPairedClients(Key.END + " " + clientHandler.getClientName() + " lost!", clientHandler,server);
 	}
 
-	public void keyPass(Status status, int passCounter, Server server, ClientHandler clientHandler){
-		if(status == Status.WHITE && passCounter > 0){
-			server.sendToPairedClients(Key.END + " " + server.getGame(clientHandler).board.blackStoneCounter + " " + server.getGame(clientHandler).board.whiteStoneCounter, clientHandler);
+	public void keyPass(Status mystatus, int passCounter, Server server, ClientHandler clientHandler){
+		server.getGame(clientHandler).update();
+		if(mystatus == Status.WHITE && passCounter > 0){
+			server.getGame(clientHandler).board.totalScore();
+			int blackScore = server.getGame(clientHandler).board.blackStoneCounter;
+			int whiteScore = server.getGame(clientHandler).board.whiteStoneCounter;
+			server.sendToPairedClients(Key.END + " " + blackScore + " " + whiteScore,clientHandler,server);
 		}else{
+			String stonestate2 = (mystatus == Status.BLACK) ? "black" : "white";
+			server.sendToPairedClients(Key.PASSED + " " + stonestate2, clientHandler, server);
 			clientHandler.passCounter++;
 		}
-		String stonestate2 = (status == Status.BLACK) ? "black" : "white";
-		server.sendToPairedClients(Key.PASSED + " " + stonestate2, clientHandler);
+		
 	}
 	
 	public void keyPlayer(String name, Server server, ClientHandler clientHandler){
@@ -193,19 +206,48 @@ public class KeyConvertor {
 		
 	}
 	
-	public void keyPassed(Client client, String statusOfPasser){
-		if(!statusOfPasser.equals(client.stoneStatus)){
-			client.myTurn= true;
-			client.print("your opponent has passed, your turn!");
+	public void keyPassed(Client client, String status){
+		if(status.equals(client.stoneStatus)){
+			client.game.update();
+			client.print("It's your opponents turn!");
+			boolean myTurn = client.game.getCurrentPlayer().equals(client.player) ? true : false;
+			client.print("valid client myturn :" + myTurn);
+			//TODO make new method
+			ThreadTurnBase turnBase = new ThreadTurnBase();
+			turnBase.client = client;
+			turnBase.start();
+			synchronized(turnBase){
+				try{
+					turnBase.wait();
+				}catch (InterruptedException e){
+					e.printStackTrace();
+				}
+			}
+			client.print("myturn after valid is: " + myTurn );
+			client.print("gamestarted after valid is: " + client.gameStarted);
 		}else{
-			client.print("you passed this turn!");
-			client.myTurn = false;
+			client.game.update();
+			client.print("opponent made a move, your turn!");
+			client.myTurn = client.game.getCurrentPlayer().equals(client.player) ? true : false;
+			client.print("valid client myturn :" + client.myTurn);
+			//TODO: make new method
+			ThreadTurnBase turnBase = new ThreadTurnBase();
+			turnBase.client = client;
+			turnBase.start();
+			synchronized(turnBase){
+				try{
+					turnBase.wait();
+				}catch (InterruptedException e){
+					e.printStackTrace();
+				}
+			}
+			client.print("gamestarted after valid is: " + client.gameStarted);
 		}
 	}
 	
 	
 	public void keyMove(String xPos, String yPos, Status myStone, Server server, ClientHandler clientHandler){
-		server.sendToPairedClients(Key.CHAT + " move detected !", clientHandler);
+		server.sendToPairedClients(Key.CHAT + " move detected !", clientHandler,server);
 		clientHandler.passCounter = 0;
 		String myStoneToString = (myStone.equals(Status.BLACK) ? "black" : "white");
 		int playerIndex = server.getGame(clientHandler).getPlayerIndex();
@@ -224,23 +266,24 @@ public class KeyConvertor {
 				y = yInput;
 			}catch(NumberFormatException e){
 				clientHandler.sendCommandText(Key.WARNING + " " + "there's no integer there (wo)man!");
-				server.sendToPairedClients(Key.INVALID + " " + stoneToString + " invalid move!", clientHandler);
+				server.sendToPairedClients(Key.INVALID + " " + stoneToString + " invalid move!", clientHandler,server);
 				server.kickClient(clientHandler);
-				server.sendToPairedClients(Key.END + " " + clientHandler.getClientName() + " " + "lost!", clientHandler);
+				server.sendToPairedClients(Key.END + " " + clientHandler.getClientName() + " " + "lost!", clientHandler,server);
 			}
 			if(server.getGame(clientHandler).board.isValidMove(x, y, myStoneToString)){
 				server.getGame(clientHandler).board.setStone(server.getGame(clientHandler).board.getPointAt(x, y), myStoneToString);
 				server.getGame(clientHandler).update();
-				server.sendToPairedClients(Key.VALID + " " + stoneToString + " " + x + " " + y, clientHandler);
+				server.sendToPairedClients(Key.VALID + " " + stoneToString + " " + x + " " + y, clientHandler,server);
 				
 				if (myStone == Status.BLACK){
 					server.getGame(clientHandler).board.blackPassed = false;
 				}
 			}
 			else{
-				server.sendToPairedClients(Key.INVALID + " stone status doesn't meet the requirements", clientHandler);
+				server.sendToPairedClients(Key.CHAT + stoneToString + " " + x + " " + y,clientHandler,server);
+				server.sendToPairedClients(Key.INVALID + " stone status doesn't meet the requirements", clientHandler,server);
 				server.kickClient(clientHandler);
-				server.sendToPairedClients(Key.END + " " + clientHandler.getClientName() + " lost!", clientHandler);
+				server.sendToPairedClients(Key.END + " " + clientHandler.getClientName() + " lost!", clientHandler,server);
 			}
 		}
 	}

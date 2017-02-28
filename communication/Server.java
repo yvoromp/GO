@@ -97,7 +97,7 @@ public class Server {
 	}
 	
 	//send only to the two paired clients
-	public synchronized void sendToPairedClients(String text, ClientHandler clientHandler){
+	public synchronized void sendToPairedClients(String text, ClientHandler clientHandler, Server server){
 		for(ClientHandler clientHandlerInGame : allClientsInGame.get(clientInGame.get(clientHandler))){
 		System.out.println(text);
 		clientHandlerInGame.sendCommandText(text);
@@ -232,7 +232,7 @@ public class Server {
 		clientHandler2.sendCommandText(Key.CHAT + " hello2");
 		clientHandler2.sendCommandText(Key.READY + " " + "white" + " " + clientHandler1.getClientName() + " " + prefBoardSize);
 		addNewGame(game, clientHandler1, clientHandler2);
-		sendToPairedClients(Key.CHAT + " u bent gepaired, uw spel begint!", clientHandler1);
+		sendToPairedClients(Key.CHAT + " u bent gepaired, uw spel begint!", clientHandler1, this);
 		game.start();
 		removeFromWaitingList(pairedClients[0]);
 		removeFromWaitingList(pairedClients[1]);
