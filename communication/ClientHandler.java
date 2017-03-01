@@ -133,7 +133,7 @@ public class ClientHandler extends Thread{
 				currentStone = playersInGame.get(name).getStone();
 			}	
 		}catch(NullPointerException e){
-			server.print("no game found!");
+			server.print(Key.END+ " " + "no game found!");
 			shutDown();
 		}
 	}

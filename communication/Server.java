@@ -99,7 +99,6 @@ public class Server {
 	//send only to the two paired clients
 	public synchronized void sendToPairedClients(String text, ClientHandler clientHandler, Server server){
 		for(ClientHandler clientHandlerInGame : allClientsInGame.get(clientInGame.get(clientHandler))){
-		System.out.println(text);
 		clientHandlerInGame.sendCommandText(text);
 		}
 		

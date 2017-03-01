@@ -28,8 +28,8 @@ public class FillBoardStrategy implements Strategy{
 		}
 		int x = (int) (Math.floor(Math.random()*(Board.DIM)));
 		int y = (int) (Math.floor(Math.random()* (Board.DIM)));
-		boolean valid = (b.isValidMove(x,y,statusToString)); 
-		//boolean valid = (b.isValidMove(x,y,statusToString) && !b.isPlacementNoGood(b.getPointAt(x, y),statusToString));
+		//boolean valid = (b.isValidMove(x,y,statusToString)); 
+		boolean valid = (b.isValidMove(x,y,statusToString) && !b.isPlacementNoGood(b.getPointAt(x, y),statusToString));
 		random = "MOVE" + " " + x + " " + y;
 		int fastCount=0;
 		while(!valid) {
@@ -54,20 +54,20 @@ public class FillBoardStrategy implements Strategy{
 			for(int j = 0; j < Board.DIM; j++){
 
 				if(b.isValidMove(i, j,status)){
-					return false;
-//					if(b.isPlacementNoGood(b.getPointAt(i, j),status)){
-//						b.stones.put(b.getPointAt(i,j), Status.NONE);
-//					}else{
-//						b.stones.put(b.getPointAt(i,j), Status.NONE);
-//						fastX = i;
-//						fastY = j;
-//						return false;
-//					}
+					if(b.isPlacementNoGood(b.getPointAt(i, j),status)){
+						b.stones.put(b.getPointAt(i,j), Status.NONE);
+					}else{
+						b.stones.put(b.getPointAt(i,j), Status.NONE);
+						fastX = i;
+						fastY = j;
+						return false;
+					}
 				}
 				
-			}
+			
 		}
-	return true;
+	
 	}
-	 
+		return true;
+	}
 }

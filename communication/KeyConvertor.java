@@ -185,6 +185,11 @@ public class KeyConvertor {
 	}
 
 	public void keyPass(Status mystatus, int passCounter, Server server, ClientHandler clientHandler){
+		try{
+			Thread.sleep(3000);
+		}catch( InterruptedException e){
+			
+		}
 		server.getGame(clientHandler).update();
 		if(mystatus == Status.WHITE && passCounter > 0){
 			server.getGame(clientHandler).board.totalScore();
@@ -202,7 +207,7 @@ public class KeyConvertor {
 	public void keyPlayer(String name, Server server, ClientHandler clientHandler){
 		clientHandler.name = name;
 		server.print(name + " had joined the server");
-		server.sendAll(Key.PLAYER + " " + name);
+		//server.sendAll(Key.PLAYER + " " + name);
 		
 	}
 	
@@ -247,6 +252,11 @@ public class KeyConvertor {
 	
 	
 	public void keyMove(String xPos, String yPos, Status myStone, Server server, ClientHandler clientHandler){
+		try{
+			Thread.sleep(3000);
+		}catch( InterruptedException e){
+			
+		}
 		server.sendToPairedClients(Key.CHAT + " move detected !", clientHandler,server);
 		clientHandler.passCounter = 0;
 		String myStoneToString = (myStone.equals(Status.BLACK) ? "black" : "white");
