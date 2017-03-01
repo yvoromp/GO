@@ -13,6 +13,10 @@ public class KeyConvertor {
 	private GoGUIIntegrator GUI;
 
 	public void keyReady(Client client, String status, String otherClientName, String boardSize){
+		GoGUIIntegrator gui = new GoGUIIntegrator(true,true,9);
+		GUI=gui;
+		GUI.startGUI();
+		
 		int validSize = 0;
 		try{
 			int size = Integer.parseInt(boardSize);
@@ -24,19 +28,18 @@ public class KeyConvertor {
 		client.print("Opponent found!");
 		client.stoneStatus = status;
 		client.print("You are playing with " + status);
+		GUI.clearBoard();
+		GUI.setBoardSize(validSize);
 		if(client.stoneStatus.equals("black")){
 			Player player1 = new AI(client.name, Status.BLACK, validSize);
 			Player player2 = new AI(otherClientName, Status.WHITE, validSize);
-			GUI.clearBoard();
-			GUI.setBoardSize(validSize);
+			
 			client.player = player1;
 			client.myTurn = true;
 			client.game = new Game(player1,player2,validSize,GUI);
 		}else{
 			Player player1 = new AI(otherClientName, Status.BLACK, validSize);
 			Player player2 = new AI(client.name, Status.WHITE, validSize);
-			GUI.clearBoard();
-			GUI.setBoardSize(validSize);
 			client.player = player2;
 			client.myTurn = false;
 			client.game = new Game(player1,player2,validSize,GUI);
@@ -189,8 +192,9 @@ public class KeyConvertor {
 	}
 
 	public void keyPass(Status mystatus, int passCounter, Server server, ClientHandler clientHandler){
+		server.sendToPairedClients(Key.CHAT + " " + mystatus + " passed!!!", clientHandler,server);
 		try{
-			Thread.sleep(3000);
+			Thread.sleep(1500);
 		}catch( InterruptedException e){
 
 		}
@@ -257,11 +261,11 @@ public class KeyConvertor {
 
 	public void keyMove(String xPos, String yPos, Status myStone, Server server, ClientHandler clientHandler){
 		try{
-			Thread.sleep(3000);
+			Thread.sleep(1500);
 		}catch( InterruptedException e){
 
 		}
-		server.sendToPairedClients(Key.CHAT + " move detected !", clientHandler,server);
+		server.sendToPairedClients(Key.CHAT + " " + myStone + " played " + xPos + " "+ yPos, clientHandler,server);
 		clientHandler.passCounter = 0;
 		String myStoneToString = (myStone.equals(Status.BLACK) ? "black" : "white");
 		int playerIndex = server.getGame(clientHandler).getPlayerIndex();

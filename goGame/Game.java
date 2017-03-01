@@ -45,6 +45,21 @@ public class Game extends Thread{
 		
 	}
 	
+	public Game(Player s0, Player s1, int boardSize){ 
+		this.boardSize = boardSize;
+		board = new Board(boardSize);
+		board.testReset(boardSize);
+		oldGamePositions = new HashSet<String>();
+		player1 = s0;
+		player2 = s1;
+		players = new HashMap <String, Player>();
+		players.put(s0.getName(), s0);
+		players.put(s1.getName(), s1);
+		playerIndex = 0;
+		passcounter = 0;
+		
+	}
+	
 	public Game(){
 		
 	}

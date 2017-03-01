@@ -14,8 +14,6 @@ public class ThreadTurnBase  extends Thread{
 				client.print("ThreadTurnBase activated!");
 				Player myPlayer = client.game.getCurrentPlayer();
 				String chosenCoordinates = myPlayer.determineMove(client.game.board);
-				client.print("send: " + chosenCoordinates);
-				client.print(client.game.board.toString() + "/n");
 				client.sendText(chosenCoordinates);
 				client.myTurn = !client.myTurn;
 				

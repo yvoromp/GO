@@ -39,8 +39,8 @@ public class FillBoardStrategy implements Strategy{
 			//valid = (b.isValidMove(x,y,statusToString) && !b.isPlacementNoGood(b.getPointAt(x, y),statusToString));
 			random = "MOVE" + " " + x + " " + y;
 			fastCount++;
-			if(fastCount>250){
-				return Key.PASS + " " + " no good or valid moves";
+			if(fastCount>999){
+				return Key.PASS + " " + " I don't know what to choose";
 			}
 		}
 		return random;

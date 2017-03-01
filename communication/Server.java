@@ -230,9 +230,7 @@ public class Server {
 			}
 		}
 		
-		clientHandler1.sendCommandText(Key.CHAT + " hello");
 		clientHandler1.sendCommandText(Key.READY + " " + "black" + " " + clientHandler2.getClientName() + " " + prefBoardSize);
-		clientHandler2.sendCommandText(Key.CHAT + " hello2");
 		clientHandler2.sendCommandText(Key.READY + " " + "white" + " " + clientHandler1.getClientName() + " " + prefBoardSize);
 		addNewGame(game, clientHandler1, clientHandler2);
 		sendToPairedClients(Key.CHAT + " u bent gepaired, uw spel begint!", clientHandler1, this);
