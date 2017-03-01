@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import Gui.GoGUIIntegrator;
 import Players.Player;
 import communication.ClientHandler.Key;
 import goGame.Board.Status;
@@ -20,6 +21,7 @@ import goGame.Go;
 
 import java.util.ArrayList;
 
+import Gui.GoGUIIntegrator;
 
 public class Server {
 	
@@ -30,6 +32,7 @@ public class Server {
 	public HashMap <Game, HashSet<ClientHandler>> allClientsInGame;
 	
 	private static int myPort = 8989;
+	private GoGUIIntegrator GUI;
 
 
 	//tries to start a Server
@@ -217,7 +220,8 @@ public class Server {
 		System.out.println(pairedClients[1] + " playing with white");
 		Player player1 = Go.currentPlayer(pairedClients[0], Status.BLACK, prefBoardSize);
 		Player player2 = Go.currentPlayer(pairedClients[1], Status.WHITE, prefBoardSize);
-		Game game = new Game(player1, player2, prefBoardSize);
+		GoGUIIntegrator gui = new GoGUIIntegrator(true,true,prefBoardSize);
+		Game game = new Game(player1, player2, prefBoardSize,gui);
 		for(ClientHandler clientHandler : threads){
 			if(clientHandler.getClientName().equals(pairedClients[0])){
 				clientHandler1 = clientHandler;

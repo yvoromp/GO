@@ -3,6 +3,7 @@ package goGame;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import Gui.GoGUIIntegrator;
 
 
 /*
@@ -28,13 +29,14 @@ public class Board {
 	public boolean isBlackArea = false;
 	public boolean isWhiteArea = false;
 	public boolean rightStage = false;
+	private GoGUIIntegrator GUI;
 
 
 
-
-	public Board(int boardSize){
+	public Board(int boardSize, GoGUIIntegrator gui){
 		DIM = boardSize;
-		reset(DIM);
+		GUI=gui;
+		reset(DIM,GUI);
 	}
 
 	//deepcopy for valid move
@@ -143,7 +145,7 @@ public class Board {
 	public boolean isKo(Index index, String status){
 		Status nowPlaying = (status.equals("black") ? Status.BLACK : Status.WHITE);
 		HashMap <Index, Status> stonesCopy = deepCopy();
-		
+
 		stones.put(index, nowPlaying);
 		changeBoardAfterMove(index, status);
 		String s = "";
@@ -185,7 +187,7 @@ public class Board {
 		}
 		Index position = getPointAt(x,y);
 		//tryStone(position, status);
-		
+
 		//savePositions();
 		if (isKo(position, status)){
 			return false;
@@ -313,7 +315,8 @@ public class Board {
 	}
 
 	//resets all the fields to empty
-	public void reset(int boardSize){
+	public void reset(int boardSize, GoGUIIntegrator gui){
+		GUI.clearBoard();
 		oldPositions = new HashSet <String>();
 		//Game.oldGamePositions = new HashSet<String>();
 		stones = new HashMap<Index, Status>();
@@ -369,8 +372,9 @@ public class Board {
 		return neighbors;
 	}
 
-	public void changeBoardAfterMove(Index i, String status){
+	public void changeBoardAfterMove(Index i, String status){ 
 		Status nowPlaying = (status.equals("black") ? Status.BLACK : Status.WHITE);
+		boolean white = (nowPlaying.equals(Status.WHITE) ? true : false);
 		for( Index neighbor : getNeighbors(i)){
 			boolean sameColorAsPlacedStone = false;
 			if(getStatus(neighbor) == getStatus(i)){
@@ -382,10 +386,12 @@ public class Board {
 			if(getStatus(neighbor) == Status.NONE && sameColorAsPlacedStone){
 				//System.out.println("SS2");
 				stones.put(i, nowPlaying);
+				GUI.addStone(i.getX(),i.getY(), white);
 			}
 			if(isHarakiri(i,nowPlaying)){
 				//System.out.println("SS3");
 				stones.put(i, nowPlaying);
+				GUI.addStone(i.getX(),i.getY(), white);
 			}
 			removeIfDeadStone(neighbor);
 		}
@@ -393,24 +399,28 @@ public class Board {
 		if(isDead(i, checkedNeighborStones)){
 			//System.out.println("SS1");
 			stones.put(i, Status.NONE);
+			GUI.removeStone(i.getX(), i.getY());
 		}
 	}
-
+	
 	/**
 	 * places the stone on the board
 	 * @param i
 	 */
 	public void setStone(Index i, String status){
 		Status nowPlaying = (status.equals("black") ? Status.BLACK : Status.WHITE);
+		boolean white = (nowPlaying.equals(Status.WHITE) ? true : false);
 		stones.put(i, nowPlaying);
+		GUI.addStone(i.getX(),i.getY(), white);
+		
 		changeBoardAfterMove(i,status);
 		savePositions();
 	}
 
-	public void tryStone(Index i, String status){
-		Status nowPlaying = (status.equals("black") ? Status.BLACK : Status.WHITE);
-		stones.put(i, nowPlaying);
-	}
+//	public void tryStone(Index i, String status){
+//		Status nowPlaying = (status.equals("black") ? Status.BLACK : Status.WHITE);
+//		stones.put(i, nowPlaying);
+//	}
 	/**
 	 * removes enclosed stones
 	 * @param i
@@ -424,6 +434,7 @@ public class Board {
 			}
 			for(Index deadStones : checkedStones){
 				stones.put(deadStones, Status.NONE);
+				GUI.removeStone(i.getX(), i.getY());
 			}
 
 		}
@@ -435,6 +446,7 @@ public class Board {
 	 * @return
 	 */
 	public boolean isPlacementNoGood(Index i, String status){
+		HashMap <Index, Status> stonesCopy = deepCopy();
 		Status stoneStatus = status.equals("black") ? Status.BLACK : Status.WHITE;
 		//true is bad placement
 		boolean noGood = false;
@@ -451,7 +463,7 @@ public class Board {
 				noGood = true;														// if thats true this stone shouldn't be placed										//empties point again
 			}	
 		}
-		stones.put(i, Status.NONE);	
+		stones = stonesCopy;	
 		return noGood;
 
 	}

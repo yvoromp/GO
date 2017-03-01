@@ -6,6 +6,7 @@ import java.util.HashSet;
 import Players.Player;
 import communication.Client;
 import communication.ClientHandler.Key;
+import Gui.GoGUIIntegrator;
 
 public class Game extends Thread{
 	
@@ -19,6 +20,7 @@ public class Game extends Thread{
 	public static HashSet <String> oldGamePositions;
 	public static int passedBefore = 0;
 	public int passcounter;
+	private GoGUIIntegrator GUI;
 	
 	/**
 	 * creates a new game
@@ -26,10 +28,11 @@ public class Game extends Thread{
 	 * @param s1
 	 * @param boardSize
 	 */
-	public Game(Player s0, Player s1, int boardSize){ 
+	public Game(Player s0, Player s1, int boardSize, GoGUIIntegrator gui){ 
 		this.boardSize = boardSize;
-		board = new Board(boardSize);
-		board.reset(boardSize);
+		GUI = gui;
+		board = new Board(boardSize, gui);
+		board.reset(boardSize, gui);
 		oldGamePositions = new HashSet<String>();
 		player1 = s0;
 		player2 = s1;
@@ -38,6 +41,7 @@ public class Game extends Thread{
 		players.put(s1.getName(), s1);
 		playerIndex = 0;
 		passcounter = 0;
+		GUI.startGUI();
 		
 	}
 	

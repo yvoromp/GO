@@ -15,6 +15,8 @@ import communication.ClientHandler.Key;
 import goGame.Game;
 import goGame.Board.Status;
 
+import Gui.GoGUIIntegrator;
+
 public class Client extends Thread{
 
 
@@ -92,6 +94,7 @@ protected Game game;
 protected boolean connected;
 public boolean myTurn;
 protected boolean gameStarted = false;
+private GoGUIIntegrator GUI;
 
 /**
  * creates a new client object
@@ -105,6 +108,7 @@ public Client(String name, InetAddress gameServerAddress, int port) throws IOExc
 	this.socket = new Socket(gameServerAddress, port);
 	this.in = new BufferedReader(new InputStreamReader (this.socket.getInputStream()));
 	this.out = new BufferedWriter(new OutputStreamWriter (this.socket.getOutputStream()));
+	GUI = new GoGUIIntegrator(true,true,5);
 	game = null;
 	connected = true;
 	myTurn = false;

@@ -6,10 +6,12 @@ import goGame.Board.Status;
 import Players.Player;
 //import Players.WebPlayer;
 import Players.AI;
+import Gui.GoGUIIntegrator;
 
 public class KeyConvertor {
-	
-	
+
+	private GoGUIIntegrator GUI;
+
 	public void keyReady(Client client, String status, String otherClientName, String boardSize){
 		int validSize = 0;
 		try{
@@ -25,17 +27,19 @@ public class KeyConvertor {
 		if(client.stoneStatus.equals("black")){
 			Player player1 = new AI(client.name, Status.BLACK, validSize);
 			Player player2 = new AI(otherClientName, Status.WHITE, validSize);
+			GUI.clearBoard();
+			GUI.setBoardSize(validSize);
 			client.player = player1;
 			client.myTurn = true;
-			client.print("init myTurn : " + client.myTurn);
-			client.game = new Game(player1,player2,validSize);
+			client.game = new Game(player1,player2,validSize,GUI);
 		}else{
 			Player player1 = new AI(otherClientName, Status.BLACK, validSize);
 			Player player2 = new AI(client.name, Status.WHITE, validSize);
+			GUI.clearBoard();
+			GUI.setBoardSize(validSize);
 			client.player = player2;
 			client.myTurn = false;
-			client.print("init myTurn : " + client.myTurn);
-			client.game = new Game(player1,player2,validSize);
+			client.game = new Game(player1,player2,validSize,GUI);
 		}
 		client.game.start();
 		client.gameStarted=true;
@@ -51,7 +55,7 @@ public class KeyConvertor {
 			}
 		}
 		client.print("gamestarted: " + client.gameStarted);
-		
+
 	}
 
 
@@ -67,7 +71,7 @@ public class KeyConvertor {
 			clientHandler.sendCommandText(Key.WARNING + " " + "there's no integer there (wo)man!");
 		}
 	}
-	
+
 	public void keyValid(Client client, String status, String xPos, String yPos){
 		client.print("client . stonestatus = " + client.stoneStatus);
 		client.print("status = " + status);
@@ -121,9 +125,9 @@ public class KeyConvertor {
 			client.print("gamestarted after valid is: " + client.gameStarted);
 		}
 		client.print("myturn after valid is: " + client.myTurn );
-		
+
 	}
-	
+
 	public void keyInvalid(Client client, String status){
 		if(status.equals(client.stoneStatus)){
 			client.print("nice job turd, bye bye!");
@@ -154,11 +158,11 @@ public class KeyConvertor {
 		}catch (InterruptedException e){
 			client.print(Key.CHAT + " " + "new game started");
 		}
-	
-		client.game.board.reset(client.game.boardSize);
+		GUI.clearBoard();
+		client.game.board.reset(client.game.boardSize,GUI);
 	}
-	
-	
+
+
 	public void keyExit(Server server, String name, ClientHandler clientHandler){
 		server.sendAll(Key.WARNING + " " + name + "is not longer connected to the server");
 		server.print(" caseEXIT shutdown");
@@ -188,7 +192,7 @@ public class KeyConvertor {
 		try{
 			Thread.sleep(3000);
 		}catch( InterruptedException e){
-			
+
 		}
 		server.getGame(clientHandler).update();
 		if(mystatus == Status.WHITE && passCounter > 0){
@@ -201,16 +205,16 @@ public class KeyConvertor {
 			server.sendToPairedClients(Key.PASSED + " " + stonestate2, clientHandler, server);
 			clientHandler.passCounter++;
 		}
-		
+
 	}
-	
+
 	public void keyPlayer(String name, Server server, ClientHandler clientHandler){
 		clientHandler.name = name;
 		server.print(name + " had joined the server");
 		//server.sendAll(Key.PLAYER + " " + name);
-		
+
 	}
-	
+
 	public void keyPassed(Client client, String status){
 		if(status.equals(client.stoneStatus)){
 			client.game.update();
@@ -249,13 +253,13 @@ public class KeyConvertor {
 			client.print("gamestarted after valid is: " + client.gameStarted);
 		}
 	}
-	
-	
+
+
 	public void keyMove(String xPos, String yPos, Status myStone, Server server, ClientHandler clientHandler){
 		try{
 			Thread.sleep(3000);
 		}catch( InterruptedException e){
-			
+
 		}
 		server.sendToPairedClients(Key.CHAT + " move detected !", clientHandler,server);
 		clientHandler.passCounter = 0;
@@ -284,7 +288,7 @@ public class KeyConvertor {
 				server.getGame(clientHandler).board.setStone(server.getGame(clientHandler).board.getPointAt(x, y), myStoneToString);
 				server.getGame(clientHandler).update();
 				server.sendToPairedClients(Key.VALID + " " + stoneToString + " " + x + " " + y, clientHandler,server);
-				
+
 				if (myStone == Status.BLACK){
 					server.getGame(clientHandler).board.blackPassed = false;
 				}
