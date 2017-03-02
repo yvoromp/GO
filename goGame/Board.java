@@ -190,6 +190,7 @@ public class Board {
 		String currentBoard = s;
 		for(String string : oldPositions){
 			if(string.equals(currentBoard)){
+				System.out.println(toString());
 				System.out.println("position has occured before, voilation of KO rule");
 				allPositions = "";
 				stones = stonesCopy;
@@ -444,23 +445,32 @@ public class Board {
 		boolean white = (nowPlaying.equals(Status.WHITE) ? true : false);
 		for( Index neighbor : getNeighbors(i)){
 			boolean sameColorAsPlacedStone = false;
+			boolean emptySpace = false;
 			if(getStatus(neighbor) == getStatus(i)){
 				sameColorAsPlacedStone = true;
+			}
+			if(getStatus(neighbor) == Status.NONE){
+				emptySpace = true;
+			}
+			if(getStatus(neighbor) != Status.NONE && getStatus(neighbor) != nowPlaying){
+				removeIfDeadStone(neighbor);
 			}
 
 			Set<Index> checkedNeighborStones = new HashSet<>();
 			checkedNeighborStones.add(i);
-			if(getStatus(neighbor) == Status.NONE && sameColorAsPlacedStone){
+			if(emptySpace && sameColorAsPlacedStone){
 				//System.out.println("SS2");
 				stones.put(i, nowPlaying);
 				GUI.addStone(i.getX(),i.getY(), white);
+				
 			}
 			if(isHarakiri(i,nowPlaying)){
 				//System.out.println("SS3");
 				stones.put(i, nowPlaying);
 				GUI.addStone(i.getX(),i.getY(), white);
+				
 			}
-			removeIfDeadStone(neighbor);
+
 		}
 		Set<Index> checkedNeighborStones = new HashSet<>();
 		if(isDead(i, checkedNeighborStones)){
@@ -491,10 +501,11 @@ public class Board {
 			if(emptySpace && sameColorAsPlacedStone){
 				//System.out.println("SS2");
 				stones.put(i, nowPlaying);
+				
 			}
 			if(isHarakiri(i,nowPlaying)){
-				System.out.println("SS3");
 				stones.put(i, nowPlaying);
+				
 			}
 		}
 		Set<Index> checkedNeighborStones = new HashSet<>();
@@ -522,7 +533,6 @@ public class Board {
 		Status nowPlaying = (status.equals("black") ? Status.BLACK : Status.WHITE);
 		boolean white = (nowPlaying.equals(Status.WHITE) ? true : false);
 		stones.put(i, nowPlaying);
-		
 		testChangeBoardAfterMove(i,status);
 		savePositions();
 	}
