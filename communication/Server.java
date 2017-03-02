@@ -5,12 +5,8 @@ import java.net.UnknownHostException;
 import java.net.ServerSocket;
 import java.net.InetAddress;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.BufferedWriter;
-import java.util.List;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
 
 import Gui.GoGUIIntegrator;
 import Players.Player;
@@ -21,8 +17,6 @@ import goGame.Go;
 
 import java.util.ArrayList;
 
-import Gui.GoGUIIntegrator;
-
 public class Server {
 	
 	public ArrayList<ClientHandler> threads;
@@ -32,7 +26,6 @@ public class Server {
 	public HashMap <Game, HashSet<ClientHandler>> allClientsInGame;
 	
 	private static int myPort = 8989;
-	private GoGUIIntegrator GUI;
 
 
 	//tries to start a Server
@@ -161,20 +154,18 @@ public class Server {
 	
 	//adds clientHandler to the waiting list
 	public void addToWaitingList(ClientHandler clientHandler, Integer boardSize){
-		print(clientHandler.getClientName());
 		waiting.put(clientHandler.getClientName(), boardSize);
 		if(!clientPref.containsKey(boardSize)){
 			clientPref.put(boardSize, new HashSet<String>());
 			print("client game preferences saved");
 		}
-		print("check5");
 		clientPref.get(boardSize).add(clientHandler.getClientName());
-		print(clientPref.get(boardSize).toString() +"    all values");
 		if(clientPairBoardSize() != 0 ){
 			int prefBoardSize = boardSize;
 			startGoGame(prefBoardSize);
 		}else{
-			clientHandler.sendCommandText(Key.WAITING + " ");
+			clientHandler.sendCommandText(Key.WAITING + " " + "you have been added to the waiting list");
+			clientHandler.sendCommandText(Key.CHAT + " " + "you are now waiting");
 		}
 		print(Key.CHAT + " client added to waitinglist");
 		
@@ -185,6 +176,7 @@ public class Server {
 	public void removeFromWaitingList(String clientName){
 		clientPref.get(waiting.get(clientName)).remove(clientName);
 		waiting.remove(clientName);
+		print(clientName + " left the waitinglist");
 	}
 	
 	public boolean isClientPair(int boardSize){
@@ -193,7 +185,6 @@ public class Server {
 			if(clientPref.get(boardSize).size() > 1){ 
 					isPair = true;
 					}
-			print(isPair +"   isclientpair");
 			return isPair;
 	}
 	
@@ -202,9 +193,7 @@ public class Server {
 		for(Integer i : clientPref.keySet()){
 			if (clientPref.get(i).size() > 1){
 				boardSize = i;
-				print(boardSize + "   is larger than 1");
 			}
-			print(boardSize +"   isclientpair");
 		}return boardSize;
 	}
 			
@@ -237,7 +226,5 @@ public class Server {
 		game.start();
 		removeFromWaitingList(pairedClients[0]);
 		removeFromWaitingList(pairedClients[1]);
-		//sendAll(Key.CHAT + " " +"new game started between " + clientHandler1.getClientName() + " and " + clientHandler2.getClientName());
-
 	}
 }

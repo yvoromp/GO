@@ -12,22 +12,27 @@ public class KeyConvertor {
 
 	private GoGUIIntegrator GUI;
 
+	/**
+	 * converts the string to an action
+	 * @param client
+	 * @param status
+	 * @param otherClientName
+	 * @param boardSize
+	 */
 	public void keyReady(Client client, String status, String otherClientName, String boardSize){
 		GoGUIIntegrator gui = new GoGUIIntegrator(true,true,9);
-		GUI=gui;
-		
+		GUI = gui;
 		
 		int validSize = 0;
 		try{
 			int size = Integer.parseInt(boardSize);
 			validSize = size;
 		}catch(NumberFormatException e){
-			client.print("wrong dimension given by the server");
 			client.connected = false;
 		}
-		client.print("Opponent found!");
+		client.print(Key.CHAT + " " +"Opponent found!");
 		client.stoneStatus = status;
-		client.print("You are playing with " + status);
+		client.print(Key.CHAT + " " +"You are playing with " + status);
 		GUI.clearBoard();
 		GUI.setBoardSize(validSize);
 		if(client.stoneStatus.equals("black")){
@@ -43,20 +48,8 @@ public class KeyConvertor {
 			client.myTurn = false;
 			client.game = new Game(player1,player2,validSize,GUI);
 		}
-		//client.game.start();
 		client.gameStarted=true;
-		//TODO: make a new method for applying thread
-		ThreadTurnBase turnBase = new ThreadTurnBase();
-		turnBase.client = client;
-		turnBase.start();
-		synchronized(turnBase){
-			try{
-				turnBase.wait();
-			}catch (InterruptedException e){
-				e.printStackTrace();
-			}
-		}
-		client.print("gamestarted: " + client.gameStarted);
+		activateTurnThread(client);
 
 	}
 
@@ -75,66 +68,35 @@ public class KeyConvertor {
 	}
 
 	public void keyValid(Client client, String status, String xPos, String yPos){
-		client.print("client . stonestatus = " + client.stoneStatus);
-		client.print("status = " + status);
-		client.print("valid currentplayer : " + client.game.getCurrentPlayer().equals(client.player));
-		client.print("valid client myturn :" + client.myTurn);
 		int x = 0;
 		int y = 0;
 		try{
 			x = Integer.parseInt(xPos);
 			y = Integer.parseInt(yPos);
 		}catch ( NumberFormatException e){
-			client.print("wrong dimension given by the server");
 			client.connected = false;
 		}
 		if(status.equals(client.stoneStatus)){
 			client.game.board.setStone(client.game.board.getPointAt(x,y), client.stoneStatus);
 			client.game.update();
-			client.print("It's your opponents turn!");
+			client.print(Key.CHAT + " " +"It's your opponents turn!");
 			boolean myTurn = client.game.getCurrentPlayer().equals(client.player) ? true : false;
-			client.print("valid client myturn :" + myTurn);
-			//TODO make new method
-			ThreadTurnBase turnBase = new ThreadTurnBase();
-			turnBase.client = client;
-			turnBase.start();
-			synchronized(turnBase){
-				try{
-					turnBase.wait();
-				}catch (InterruptedException e){
-					e.printStackTrace();
-				}
-			}
-			client.print("myturn after valid is: " + myTurn );
-			client.print("gamestarted after valid is: " + client.gameStarted);
+			activateTurnThread(client);
 		}else{
 			client.game.board.setStone(client.game.board.getPointAt(x,y), status);
 			client.game.update();
-			client.print("opponent made a move, your turn!");
+			client.print(Key.CHAT + " " +"opponent made a move, your turn!");
 			client.myTurn = client.game.getCurrentPlayer().equals(client.player) ? true : false;
-			client.print("valid client myturn :" + client.myTurn);
-			//TODO: make new method
-			ThreadTurnBase turnBase = new ThreadTurnBase();
-			turnBase.client = client;
-			turnBase.start();
-			synchronized(turnBase){
-				try{
-					turnBase.wait();
-				}catch (InterruptedException e){
-					e.printStackTrace();
-				}
-			}
-			client.print("gamestarted after valid is: " + client.gameStarted);
+			activateTurnThread(client);
 		}
-		client.print("myturn after valid is: " + client.myTurn );
 
 	}
 
 	public void keyInvalid(Client client, String status){
 		if(status.equals(client.stoneStatus)){
-			client.print("nice job turd, bye bye!");
+			client.print(Key.CHAT + " " +"nice job turd, bye bye!");
 		}else{
-			client.print("your opponent is a retard, he's gone");
+			client.print(Key.CHAT + " " +"your opponent is a retard, he's gone");
 		}
 	}
 
@@ -154,12 +116,6 @@ public class KeyConvertor {
 		}else{
 			client.print(Key.CHAT + " " + "there's a draw " + score1 + " : " + score2);
 		}
-		client.print(Key.CHAT + " " + "another game starts in 10 seconds, type EXIT to leave");
-		try{
-			Thread.sleep(10000);
-		}catch (InterruptedException e){
-			client.print(Key.CHAT + " " + "new game started");
-		}
 		GUI.clearBoard();
 		client.game.board.reset(client.game.boardSize,GUI);
 	}
@@ -167,7 +123,6 @@ public class KeyConvertor {
 
 	public void keyExit(Server server, String name, ClientHandler clientHandler){
 		server.sendAll(Key.WARNING + " " + name + "is not longer connected to the server");
-		server.print(" caseEXIT shutdown");
 		clientHandler.shutDown();
 	}
 
@@ -176,7 +131,6 @@ public class KeyConvertor {
 	}
 
 	public void keyChat(String text, Server server, ClientHandler clientHandler){
-		
 		server.sendAll(text);
 	}
 
@@ -215,7 +169,6 @@ public class KeyConvertor {
 	public void keyPlayer(String name, Server server, ClientHandler clientHandler){
 		clientHandler.name = name;
 		server.print(name + " had joined the server");
-		//server.sendAll(Key.PLAYER + " " + name);
 
 	}
 
@@ -224,41 +177,23 @@ public class KeyConvertor {
 			client.game.update();
 			client.print("It's your opponents turn!");
 			boolean myTurn = client.game.getCurrentPlayer().equals(client.player) ? true : false;
-			client.print("valid client myturn :" + myTurn);
-			//TODO make new method
-			ThreadTurnBase turnBase = new ThreadTurnBase();
-			turnBase.client = client;
-			turnBase.start();
-			synchronized(turnBase){
-				try{
-					turnBase.wait();
-				}catch (InterruptedException e){
-					e.printStackTrace();
-				}
-			}
-			client.print("myturn after valid is: " + myTurn );
-			client.print("gamestarted after valid is: " + client.gameStarted);
+			activateTurnThread(client);
 		}else{
 			client.game.update();
 			client.print("opponent made a move, your turn!");
 			client.myTurn = client.game.getCurrentPlayer().equals(client.player) ? true : false;
-			client.print("valid client myturn :" + client.myTurn);
-			//TODO: make new method
-			ThreadTurnBase turnBase = new ThreadTurnBase();
-			turnBase.client = client;
-			turnBase.start();
-			synchronized(turnBase){
-				try{
-					turnBase.wait();
-				}catch (InterruptedException e){
-					e.printStackTrace();
-				}
-			}
-			client.print("gamestarted after valid is: " + client.gameStarted);
+			activateTurnThread(client);
 		}
 	}
 
-
+/**
+ * aacts on given keyword move
+ * @param xPos
+ * @param yPos
+ * @param myStone
+ * @param server
+ * @param clientHandler
+ */
 	public void keyMove(String xPos, String yPos, Status myStone, Server server, ClientHandler clientHandler){
 		try{
 			Thread.sleep(1500);
@@ -272,9 +207,6 @@ public class KeyConvertor {
 		Status currentStone = (playerIndex == 0) ? Status.BLACK : Status.WHITE;
 		int x = -1;
 		int y = -1;
-		server.print("playerindex:  " + playerIndex);
-		server.print("currentStone:  " + currentStone.toString());
-		server.print("myStone:  " + myStone);
 		if(currentStone.equals(myStone)){
 			String stoneToString = clientHandler.statusToString(myStone);
 			try{
@@ -286,7 +218,7 @@ public class KeyConvertor {
 				clientHandler.sendCommandText(Key.WARNING + " " + "there's no integer there (wo)man!");
 				server.sendToPairedClients(Key.INVALID + " " + stoneToString + " invalid move!", clientHandler,server);
 				server.kickClient(clientHandler);
-				server.sendToPairedClients(Key.END + " " + clientHandler.getClientName() + " " + "lost!", clientHandler,server);
+				server.sendToPairedClients(Key.CHAT + " " + clientHandler.getClientName() + " " + "lost!", clientHandler,server);
 			}
 			if(server.getGame(clientHandler).board.isValidMove(x, y, myStoneToString)){
 				server.getGame(clientHandler).board.setStone(server.getGame(clientHandler).board.getPointAt(x, y), myStoneToString);
@@ -301,7 +233,24 @@ public class KeyConvertor {
 				server.sendToPairedClients(Key.CHAT + stoneToString + " " + x + " " + y,clientHandler,server);
 				server.sendToPairedClients(Key.INVALID + " stone status doesn't meet the requirements", clientHandler,server);
 				server.kickClient(clientHandler);
-				server.sendToPairedClients(Key.END + " " + clientHandler.getClientName() + " lost!", clientHandler,server);
+				server.sendToPairedClients(Key.CHAT + " " + clientHandler.getClientName() + " lost!", clientHandler,server);
+			}
+		}
+	}
+	
+	/**
+	 * activates thread to determine move of current player
+	 * @param client
+	 */
+	private void activateTurnThread(Client client){
+		ThreadTurnBase turnBase = new ThreadTurnBase();
+		turnBase.client = client;
+		turnBase.start();
+		synchronized(turnBase){
+			try{
+				turnBase.wait();
+			}catch (InterruptedException e){
+				e.printStackTrace();
 			}
 		}
 	}

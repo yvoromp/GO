@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import communication.ClientHandler.Key;
-
 
 public class ThreadKeyBoardInput extends Thread{
 
@@ -16,6 +14,11 @@ public class ThreadKeyBoardInput extends Thread{
 		inputByKeyboard(client);
 	}
 	
+	/**
+	 * checks if there is input
+	 * @param client
+	 * @return
+	 */
 	public boolean isKeyboardInput(Client client){
 		BufferedReader k = new BufferedReader(new InputStreamReader(System.in));
 		boolean valid = false;
@@ -28,6 +31,10 @@ public class ThreadKeyBoardInput extends Thread{
 
 	}
 
+	/**
+	 * sends keyboardinput to client output
+	 * @param client
+	 */
 	public void inputByKeyboard(Client client){
 		try{
 			while(isKeyboardInput(client)){

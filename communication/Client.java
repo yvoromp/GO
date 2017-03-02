@@ -15,7 +15,6 @@ import communication.ClientHandler.Key;
 import goGame.Game;
 import goGame.Board.Status;
 
-import Gui.GoGUIIntegrator;
 
 public class Client extends Thread{
 
@@ -57,13 +56,6 @@ public class Client extends Thread{
 			clientKeyBoardInput.start();
 			client.start();
 
-//			if(clientName.equals("robot") || clientName.equals("machine")){
-//				clientKeyBoardInput.inputByKeyboard(client);
-//			}else{
-//				String send =readText("");
-//				client.sendText(send);
-//			}
-
 			//make thread and notify when connection is made
 			ThreadConnected connected = new ThreadConnected();
 			connected.client = client;
@@ -94,7 +86,6 @@ protected Game game;
 protected boolean connected;
 public boolean myTurn;
 protected boolean gameStarted = false;
-private GoGUIIntegrator GUI;
 
 /**
  * creates a new client object
@@ -108,7 +99,6 @@ public Client(String name, InetAddress gameServerAddress, int port) throws IOExc
 	this.socket = new Socket(gameServerAddress, port);
 	this.in = new BufferedReader(new InputStreamReader (this.socket.getInputStream()));
 	this.out = new BufferedWriter(new OutputStreamWriter (this.socket.getOutputStream()));
-	//GUI = new GoGUIIntegrator(true,true,5);
 	game = null;
 	connected = true;
 	myTurn = false;
@@ -170,7 +160,7 @@ public void print(String text){
  * @return
  */
 public static String readText(String text){
-	System.out.print(text); // string converts into bytes
+	System.out.print(text);
 	String answer = null;
 	try{
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -181,15 +171,9 @@ public static String readText(String text){
 	return (answer == null) ? "" : answer;
 }
 
-/**
- * takes input form terminal and prints it or sends it to clientHandlerclass
- * @param client
- * @return
- */
-
 
 /**
- * reads the input given from the clientHandler or server and acts upon recieved input
+ * reads the input given from the clientHandler or server and acts upon received input
  */
 public void readServerInput(){
 	String serverInput = "";

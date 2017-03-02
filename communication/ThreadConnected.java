@@ -9,6 +9,9 @@ public class ThreadConnected extends Thread{
 	protected boolean connectionMade;
 
 	@Override
+	/**
+	 * loops until socket is connected
+	 */
 	public void run(){
 		synchronized(this){
 			while(!socket.isConnected()){

@@ -1,13 +1,12 @@
 package communication;
 
 import java.net.Socket;
-import java.net.SocketException;
 
 import communication.KeyConvertor;
 import Players.Player;
 import goGame.Board.Status;
-import java.io.BufferedReader;		//reads from inputstream
-import java.io.BufferedWriter; 		// writes to outputstream
+import java.io.BufferedReader;		//reads from input stream
+import java.io.BufferedWriter; 		// writes to output stream
 import java.io.InputStreamReader; 	//reads bytes and decodes them into characters
 import java.io.OutputStreamWriter; 	//Characters written to it are encoded into bytes
 import java.io.IOException;
@@ -46,16 +45,6 @@ public class ClientHandler extends Thread{
 		this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 	}
 
-	/**
-	 * reads name from terminal and notifies all clients
-	 * @throws IOException
-	 */
-	public void announce() throws IOException{
-		name = in.readLine().toLowerCase();
-		server.sendAll(Key.PLAYER + " " + name);
-	}
-
-
 	public Socket getClient(){
 		return socket;
 	}
@@ -82,7 +71,7 @@ public class ClientHandler extends Thread{
 			out.flush();
 		}catch (IOException e){
 			e.printStackTrace();
-			server.print("check sendcommandtext problem");
+			server.print(Key.WARNING + " there is a sendcommandtext problem");
 			shutDown();
 		}
 	}
@@ -132,7 +121,7 @@ public class ClientHandler extends Thread{
 				currentStone = playersInGame.get(name).getStone();
 			}	
 		}catch(NullPointerException e){
-			server.print(Key.END+ " " + "no game found!");
+			server.print(Key.END + " " + "no game found!");
 			shutDown();
 		}
 	}
