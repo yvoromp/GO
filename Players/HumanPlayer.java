@@ -6,7 +6,6 @@ import java.util.Scanner;
 
 import communication.ClientHandler.Key;
 import goGame.Board;
-import goGame.Index;
 
 public class HumanPlayer extends Player{
 

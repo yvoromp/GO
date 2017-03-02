@@ -80,7 +80,6 @@ public class KeyConvertor {
 			client.game.board.setStone(client.game.board.getPointAt(x,y), client.stoneStatus);
 			client.game.update();
 			client.print(Key.CHAT + " " +"It's your opponents turn!");
-			boolean myTurn = client.game.getCurrentPlayer().equals(client.player) ? true : false;
 			activateTurnThread(client);
 		}else{
 			client.game.board.setStone(client.game.board.getPointAt(x,y), status);
@@ -176,7 +175,6 @@ public class KeyConvertor {
 		if(status.equals(client.stoneStatus)){
 			client.game.update();
 			client.print("It's your opponents turn!");
-			boolean myTurn = client.game.getCurrentPlayer().equals(client.player) ? true : false;
 			activateTurnThread(client);
 		}else{
 			client.game.update();

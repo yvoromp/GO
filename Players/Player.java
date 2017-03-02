@@ -2,7 +2,6 @@ package Players;
 
 import goGame.Board.Status;
 import goGame.Board;
-import goGame.Index;
 
 public abstract class Player {
 	

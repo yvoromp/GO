@@ -56,7 +56,7 @@ public class Board {
 		isBlack = !isBlack;
 	}
 
-	//pass, inlcuding passrule
+	//pass, including pass rule
 	public void pass(){
 		if( !isBlack && blackPassed){
 			gameEnded = true;
@@ -92,24 +92,6 @@ public class Board {
 		return position;
 	}
 
-	//	public Status getStatus(int x, int y) {
-	//		return (stones.get(getPointAt(x, y)));
-	//	}
-
-	/**
-	 * checks if the index is empty
-	 * @param i
-	 * @return
-	 */
-	public boolean isEmpty(Index i){
-		return (stones.get(i) == Status.NONE);
-	}
-
-
-	public Index getLastMove(){
-		return lastMove;
-	}
-
 	public Index getPointAt(int x, int y){
 		for (Index index : stones.keySet()) {
 			if (index.getX() == x && index.getY() == y) {
@@ -120,7 +102,7 @@ public class Board {
 	}
 
 	/**
-	 * checks for suicide
+	 * checks for suicide of stone
 	 * @param i
 	 * @param s
 	 * @return
@@ -146,6 +128,13 @@ public class Board {
 		return harakiri;
 
 	}
+	
+	/**
+	 * checks if KO rule is violated
+	 * @param index
+	 * @param status
+	 * @return
+	 */
 	public boolean isKo(Index index, String status){
 		Status nowPlaying = (status.equals("black") ? Status.BLACK : Status.WHITE);
 		HashMap <Index, Status> stonesCopy = deepCopy();
@@ -163,7 +152,6 @@ public class Board {
 		String currentBoard = s;
 		for(String string : oldPositions){
 			if(string.equals(currentBoard)){
-				System.out.println("position has occured before, voilation of KO rule");
 				allPositions = "";
 				stones = stonesCopy;
 				return true;
@@ -208,19 +196,14 @@ public class Board {
 	 * @return
 	 */
 	public boolean isValidMove(int x, int y, String status){
-		Status nowPlaying = (status.equals("black") ? Status.BLACK : Status.WHITE);
 		if ( x < 0 || y < 0 || x > DIM -1 || y > DIM - 1){
 			return false;
 		}
 
 		if (stones.get(getPointAt(x,y)) != Status.NONE){
-			//System.out.println(" position1");
 			return false;
 		}
 		Index position = getPointAt(x,y);
-		//tryStone(position, status);
-
-		//savePositions();
 		if (isKo(position, status)){
 			return false;
 		}
@@ -229,19 +212,16 @@ public class Board {
 	}
 	
 	public boolean testIsValidMove(int x, int y, String status){
-		Status nowPlaying = (status.equals("black") ? Status.BLACK : Status.WHITE);
 		if ( x < 0 || y < 0 || x > DIM -1 || y > DIM - 1){
 			return false;
 		}
 
 		if (stones.get(getPointAt(x,y)) != Status.NONE){
-			//System.out.println(" position1");
+
 			return false;
 		}
 		Index position = getPointAt(x,y);
-		//tryStone(position, status);
 
-		//savePositions();
 		if (testIsKo(position, status)){
 			return false;
 		}
@@ -275,7 +255,7 @@ public class Board {
 	}
 
 	/**
-	 * checks for liberties
+	 * checks which status owns an index
 	 * @param i
 	 * @param checkedPoints
 	 * @return
@@ -371,15 +351,12 @@ public class Board {
 	public void reset(int boardSize, GoGUIIntegrator gui){
 		GUI.clearBoard();
 		oldPositions = new HashSet <String>();
-		//Game.oldGamePositions = new HashSet<String>();
 		stones = new HashMap<Index, Status>();
 		DIM = boardSize;
 		for (int i = 0; i < DIM; i++){
 			for(int j = 0; j < DIM; j++){
 				Index index = new Index(i , j);
 				stones.put(index, Status.NONE);
-				//System.out.println("The first index position has status:  " + stones.get(index));
-
 			}
 
 		}
@@ -387,15 +364,12 @@ public class Board {
 	
 	public void testReset(int boardSize){
 		oldPositions = new HashSet <String>();
-		//Game.oldGamePositions = new HashSet<String>();
 		stones = new HashMap<Index, Status>();
 		DIM = boardSize;
 		for (int i = 0; i < DIM; i++){
 			for(int j = 0; j < DIM; j++){
 				Index index = new Index(i , j);
 				stones.put(index, Status.NONE);
-				//System.out.println("The first index position has status:  " + stones.get(index));
-
 			}
 
 		}
@@ -440,6 +414,11 @@ public class Board {
 		return neighbors;
 	}
 
+	/**
+	 * change the board after a stone is set
+	 * @param i
+	 * @param status
+	 */
 	public void changeBoardAfterMove(Index i, String status){ 
 		Status nowPlaying = (status.equals("black") ? Status.BLACK : Status.WHITE);
 		boolean white = (nowPlaying.equals(Status.WHITE) ? true : false);
@@ -459,13 +438,11 @@ public class Board {
 			Set<Index> checkedNeighborStones = new HashSet<>();
 			checkedNeighborStones.add(i);
 			if(emptySpace && sameColorAsPlacedStone){
-				//System.out.println("SS2");
 				stones.put(i, nowPlaying);
 				GUI.addStone(i.getY(),i.getX(), white);
 				
 			}
 			if(isHarakiri(i,nowPlaying)){
-				//System.out.println("SS3");
 				stones.put(i, nowPlaying);
 				GUI.addStone(i.getY(),i.getX(), white);
 				
@@ -474,7 +451,6 @@ public class Board {
 		}
 		Set<Index> checkedNeighborStones = new HashSet<>();
 		if(isDead(i, checkedNeighborStones)){
-			//System.out.println("SS1");
 			stones.put(i, Status.NONE);
 			GUI.removeStone(i.getY(), i.getX());
 		}
@@ -482,7 +458,6 @@ public class Board {
 	
 	public void testChangeBoardAfterMove(Index i, String status){ 
 		Status nowPlaying = (status.equals("black") ? Status.BLACK : Status.WHITE);
-		boolean white = (nowPlaying.equals(Status.WHITE) ? true : false);
 		for( Index neighbor : getNeighbors(i)){
 			boolean sameColorAsPlacedStone = false;
 			boolean emptySpace = false;
@@ -499,7 +474,6 @@ public class Board {
 			Set<Index> checkedNeighborStones = new HashSet<>();
 			checkedNeighborStones.add(i);
 			if(emptySpace && sameColorAsPlacedStone){
-				//System.out.println("SS2");
 				stones.put(i, nowPlaying);
 				
 			}
@@ -510,7 +484,6 @@ public class Board {
 		}
 		Set<Index> checkedNeighborStones = new HashSet<>();
 		if(isDead(i, checkedNeighborStones)){
-			//System.out.println("SS1");
 			stones.put(i, Status.NONE);
 		}
 	}
@@ -524,14 +497,12 @@ public class Board {
 		boolean white = (nowPlaying.equals(Status.WHITE) ? true : false);
 		stones.put(i, nowPlaying);
 		GUI.addStone(i.getY(),i.getX(), white);
-		
 		changeBoardAfterMove(i,status);
 		savePositions();
 	}
 	
 	public void testSetStone(Index i, String status){
 		Status nowPlaying = (status.equals("black") ? Status.BLACK : Status.WHITE);
-		boolean white = (nowPlaying.equals(Status.WHITE) ? true : false);
 		stones.put(i, nowPlaying);
 		testChangeBoardAfterMove(i,status);
 		savePositions();
