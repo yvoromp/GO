@@ -15,7 +15,7 @@ public class KeyConvertor {
 	public void keyReady(Client client, String status, String otherClientName, String boardSize){
 		GoGUIIntegrator gui = new GoGUIIntegrator(true,true,9);
 		GUI=gui;
-		GUI.startGUI();
+		
 		
 		int validSize = 0;
 		try{
@@ -33,7 +33,6 @@ public class KeyConvertor {
 		if(client.stoneStatus.equals("black")){
 			Player player1 = new AI(client.name, Status.BLACK, validSize);
 			Player player2 = new AI(otherClientName, Status.WHITE, validSize);
-			
 			client.player = player1;
 			client.myTurn = true;
 			client.game = new Game(player1,player2,validSize,GUI);
@@ -44,7 +43,7 @@ public class KeyConvertor {
 			client.myTurn = false;
 			client.game = new Game(player1,player2,validSize,GUI);
 		}
-		client.game.start();
+		//client.game.start();
 		client.gameStarted=true;
 		//TODO: make a new method for applying thread
 		ThreadTurnBase turnBase = new ThreadTurnBase();
@@ -176,8 +175,9 @@ public class KeyConvertor {
 		clientHandler.sendCommandText(text);
 	}
 
-	public void keyChat(String text, Server server){
-		server.sendAll(Key.CHAT + " " + text);
+	public void keyChat(String text, Server server, ClientHandler clientHandler){
+		
+		server.sendAll(text);
 	}
 
 	public void keyCancel(String name, Server server, ClientHandler clientHandler){

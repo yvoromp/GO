@@ -119,7 +119,6 @@ public class ClientHandler extends Thread{
 			valid = ((validInput = in.readLine()) != null) ? true : false;
 		}catch (IOException e){
 			sendCommandText(Key.WARNING + " " + "there's nothing to read here!");
-			shutDown();
 		}
 		return valid;
 
@@ -163,7 +162,7 @@ public class ClientHandler extends Thread{
 					check.keyWaiting(validInput, this);
 					break;
 				case CHAT:
-					check.keyChat(validInput, server);
+					check.keyChat(validInput, server,this);
 					break;
 				case CANCEL:
 					check.keyCancel(name, server, this);
@@ -188,9 +187,9 @@ public class ClientHandler extends Thread{
 			}
 		}catch(IllegalArgumentException e){
 			sendCommandText(Key.WARNING + " " + "use the right keywords and arguments!");
-			server.print("WARNING!! clientHandler.run shutdown");	
+			run();	
 		}
-		shutDown();
+		
 	}
 
 }

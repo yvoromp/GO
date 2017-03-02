@@ -461,13 +461,13 @@ public class Board {
 			if(emptySpace && sameColorAsPlacedStone){
 				//System.out.println("SS2");
 				stones.put(i, nowPlaying);
-				GUI.addStone(i.getX(),i.getY(), white);
+				GUI.addStone(i.getY(),i.getX(), white);
 				
 			}
 			if(isHarakiri(i,nowPlaying)){
 				//System.out.println("SS3");
 				stones.put(i, nowPlaying);
-				GUI.addStone(i.getX(),i.getY(), white);
+				GUI.addStone(i.getY(),i.getX(), white);
 				
 			}
 
@@ -476,7 +476,7 @@ public class Board {
 		if(isDead(i, checkedNeighborStones)){
 			//System.out.println("SS1");
 			stones.put(i, Status.NONE);
-			GUI.removeStone(i.getX(), i.getY());
+			GUI.removeStone(i.getY(), i.getX());
 		}
 	}
 	
@@ -523,7 +523,7 @@ public class Board {
 		Status nowPlaying = (status.equals("black") ? Status.BLACK : Status.WHITE);
 		boolean white = (nowPlaying.equals(Status.WHITE) ? true : false);
 		stones.put(i, nowPlaying);
-		GUI.addStone(i.getX(),i.getY(), white);
+		GUI.addStone(i.getY(),i.getX(), white);
 		
 		changeBoardAfterMove(i,status);
 		savePositions();
@@ -554,7 +554,7 @@ public class Board {
 			}
 			for(Index deadStones : checkedStones){
 				stones.put(deadStones, Status.NONE);
-				GUI.removeStone(i.getX(), i.getY());
+				GUI.removeStone(deadStones.getY(), deadStones.getX());
 			}
 
 		}
