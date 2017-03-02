@@ -5,13 +5,10 @@ import java.net.UnknownHostException;
 import java.net.ServerSocket;
 import java.net.InetAddress;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.BufferedWriter;
-import java.util.List;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
 
+import Gui.GoGUIIntegrator;
 import Players.Player;
 import communication.ClientHandler.Key;
 import goGame.Board.Status;
@@ -19,7 +16,6 @@ import goGame.Game;
 import goGame.Go;
 
 import java.util.ArrayList;
-
 
 public class Server {
 	
@@ -97,9 +93,8 @@ public class Server {
 	}
 	
 	//send only to the two paired clients
-	public synchronized void sendToPairedClients(String text, ClientHandler clientHandler){
+	public synchronized void sendToPairedClients(String text, ClientHandler clientHandler, Server server){
 		for(ClientHandler clientHandlerInGame : allClientsInGame.get(clientInGame.get(clientHandler))){
-		System.out.println(text);
 		clientHandlerInGame.sendCommandText(text);
 		}
 		
@@ -159,20 +154,18 @@ public class Server {
 	
 	//adds clientHandler to the waiting list
 	public void addToWaitingList(ClientHandler clientHandler, Integer boardSize){
-		print(clientHandler.getClientName());
 		waiting.put(clientHandler.getClientName(), boardSize);
 		if(!clientPref.containsKey(boardSize)){
 			clientPref.put(boardSize, new HashSet<String>());
 			print("client game preferences saved");
 		}
-		print("check5");
 		clientPref.get(boardSize).add(clientHandler.getClientName());
-		print(clientPref.get(boardSize).toString() +"    all values");
 		if(clientPairBoardSize() != 0 ){
 			int prefBoardSize = boardSize;
 			startGoGame(prefBoardSize);
 		}else{
-			clientHandler.sendCommandText(Key.WAITING + " ");
+			clientHandler.sendCommandText(Key.WAITING + " " + "you have been added to the waiting list");
+			clientHandler.sendCommandText(Key.CHAT + " " + "you are now waiting");
 		}
 		print(Key.CHAT + " client added to waitinglist");
 		
@@ -183,6 +176,7 @@ public class Server {
 	public void removeFromWaitingList(String clientName){
 		clientPref.get(waiting.get(clientName)).remove(clientName);
 		waiting.remove(clientName);
+		print(clientName + " left the waitinglist");
 	}
 	
 	public boolean isClientPair(int boardSize){
@@ -191,7 +185,6 @@ public class Server {
 			if(clientPref.get(boardSize).size() > 1){ 
 					isPair = true;
 					}
-			print(isPair +"   isclientpair");
 			return isPair;
 	}
 	
@@ -200,9 +193,7 @@ public class Server {
 		for(Integer i : clientPref.keySet()){
 			if (clientPref.get(i).size() > 1){
 				boardSize = i;
-				print(boardSize + "   is larger than 1");
 			}
-			print(boardSize +"   isclientpair");
 		}return boardSize;
 	}
 			
@@ -216,9 +207,10 @@ public class Server {
 		ClientHandler clientHandler2 = null;
 		System.out.println(pairedClients[0] + " playing with black");
 		System.out.println(pairedClients[1] + " playing with white");
-		Player player1 = Go.newWebPlayer(pairedClients[0], Status.BLACK, prefBoardSize);
-		Player player2 = Go.newWebPlayer(pairedClients[1], Status.WHITE, prefBoardSize);
-		Game game = new Game(player1, player2, prefBoardSize);
+		Player player1 = Go.currentPlayer(pairedClients[0], Status.BLACK, prefBoardSize);
+		Player player2 = Go.currentPlayer(pairedClients[1], Status.WHITE, prefBoardSize);
+		GoGUIIntegrator gui = new GoGUIIntegrator(true,true,prefBoardSize);
+		Game game = new Game(player1, player2, prefBoardSize,gui);
 		for(ClientHandler clientHandler : threads){
 			if(clientHandler.getClientName().equals(pairedClients[0])){
 				clientHandler1 = clientHandler;
@@ -227,17 +219,12 @@ public class Server {
 			}
 		}
 		
-		clientHandler1.sendCommandText(Key.CHAT + " hello");
 		clientHandler1.sendCommandText(Key.READY + " " + "black" + " " + clientHandler2.getClientName() + " " + prefBoardSize);
-		clientHandler2.sendCommandText(Key.CHAT + " hello2");
 		clientHandler2.sendCommandText(Key.READY + " " + "white" + " " + clientHandler1.getClientName() + " " + prefBoardSize);
 		addNewGame(game, clientHandler1, clientHandler2);
-		sendToPairedClients(Key.CHAT + " u bent gepaired, uw spel begint!", clientHandler1);
-		sendAll(Key.CHAT + " " +"new game started between " + clientHandler1.getClientName() + " and " + clientHandler2.getClientName());
+		sendToPairedClients(Key.CHAT + " u bent gepaired, uw spel begint!", clientHandler1, this);
 		game.start();
 		removeFromWaitingList(pairedClients[0]);
 		removeFromWaitingList(pairedClients[1]);
-
-
 	}
 }

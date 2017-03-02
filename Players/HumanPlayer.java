@@ -3,12 +3,14 @@ package Players;
 import goGame.Board.Status;
 
 import java.util.Scanner;
+
+import communication.ClientHandler.Key;
 import goGame.Board;
-import goGame.Index;
 
 public class HumanPlayer extends Player{
 
-	
+	private String status;
+
 	/**
 	 * creates a human player instance
 	 * @param name
@@ -17,8 +19,9 @@ public class HumanPlayer extends Player{
 	 */
 	public HumanPlayer(String name, Status status, int boardSize){
 		super(name, status, boardSize);
+		this.status = (status.equals(Status.BLACK) ? "black" : "white");
 	}
-	
+
 	/**
 	 * checks for pass
 	 */
@@ -33,65 +36,62 @@ public class HumanPlayer extends Player{
 		}
 		return pass;
 	}
-	
-	
+
+
 	public String webMove(Board board){
 		return "not used here";
 	}
-	
+
 	/**
 	 * asks the human player where he/she likes to place his/her stone 
 	 */
-	public Index determineMove(Board board){
+	public String determineMove(Board board){
 		int x;
 		int y;
-		
-		String prompt = "*" + getName() +" playing with " + getStone().toString() + " : select x position";
-		int positionX = readInt(prompt);
-		x = positionX;
-		String prompt2 = "*" + getName() +" playing with " + getStone().toString() + " : select y position";
-		int positionY = readInt(prompt2);
-		y = positionY;
-		
-		boolean valid =  (board.isValidMove(x,y));
+
+		String prompt = "*" + getName() + getStone().toString() + " : give your move";
+		String answer = readLine(prompt);
+		String[] splited = answer.split(" ");
+		x = Integer.parseInt(splited[0]);
+		y = Integer.parseInt(splited[1]);
+
+		boolean valid =  (board.isValidMove(x,y,status));
 		while(!valid) {
-			System.out.println("ERROR: position " + positionX + " , " + positionY + " is not a valid move");
-			String prompt3 = "*" + getName() +" playing with " + getStone().toString() + " : select x position";
-			int positionX2 = readInt(prompt3);
-			x = positionX2;
-			String prompt4 = "*" + getName() +" playing with " + getStone().toString() + " : select y position";
-			int positionY2 = readInt(prompt4);
-			y = positionY2;
-			valid = (board.isValidMove(x,y));
-			
-			}
-		System.out.println("move" + " "+ x + " " + y);
-		return board.getPointAt(x,y);
+			System.out.println("ERROR: position " + x + " , " + y + " is not a valid move");
+			String prompt3 = "*" + getName() + getStone().toString() + " : make your move";
+			String answer2 = readLine(prompt3);
+			String[] splited2 = answer2.split(" ");
+			x = Integer.parseInt(splited2[1]);
+			y = Integer.parseInt(splited2[2]);
+			valid = (board.isValidMove(x,y,status));
+
+		}
+		return (Key.MOVE + " "+ x + " " + y);
 	}
-	
+
 	/**
 	 * reads of int values until one that's not suitable is entered
 	 * @param prompt
 	 * @return
 	 */
-	public int readInt(String prompt){
-		int value = 0;
+	public String readLine(String prompt){
+		String value = "";
 		boolean correctRead = false;
 		Scanner line= new Scanner(System.in);
 		do {
 			System.out.print(prompt);
 			try (Scanner scanLine = new Scanner(line.nextLine())) {
-				if(scanLine.hasNextInt()) {
+				if(scanLine.hasNextLine()) {
 					correctRead = true;
-					value = scanLine.nextInt();
+					value = scanLine.nextLine();
 				}
-					
+
 			}
 		} while (!correctRead);
 		return value;
-		
-		
-		
+
+
+
 	}
 
 

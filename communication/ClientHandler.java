@@ -1,11 +1,12 @@
 package communication;
 
 import java.net.Socket;
+
 import communication.KeyConvertor;
 import Players.Player;
 import goGame.Board.Status;
-import java.io.BufferedReader;		//reads from inputstream
-import java.io.BufferedWriter; 		// writes to outputstream
+import java.io.BufferedReader;		//reads from input stream
+import java.io.BufferedWriter; 		// writes to output stream
 import java.io.InputStreamReader; 	//reads bytes and decodes them into characters
 import java.io.OutputStreamWriter; 	//Characters written to it are encoded into bytes
 import java.io.IOException;
@@ -44,16 +45,6 @@ public class ClientHandler extends Thread{
 		this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 	}
 
-	/**
-	 * reads name from terminal and notifies all clients
-	 * @throws IOException
-	 */
-	public void announce() throws IOException{
-		name = in.readLine().toLowerCase();
-		server.sendAll(Key.PLAYER + " " + name);
-	}
-
-
 	public Socket getClient(){
 		return socket;
 	}
@@ -70,7 +61,7 @@ public class ClientHandler extends Thread{
 
 
 	/**
-	 * sends commandtexts over a socket to the clientHandler
+	 * sends commandtexts over a socket to the client
 	 * @param text
 	 */
 	public void sendCommandText(String text){
@@ -80,7 +71,7 @@ public class ClientHandler extends Thread{
 			out.flush();
 		}catch (IOException e){
 			e.printStackTrace();
-			server.print("check sendcommandtext problem");
+			server.print(Key.WARNING + " there is a sendcommandtext problem");
 			shutDown();
 		}
 	}
@@ -112,13 +103,11 @@ public class ClientHandler extends Thread{
 	}
 
 	public boolean isInput(){
-		validInput = "";
 		boolean valid = false;
 		try{
 			valid = ((validInput = in.readLine()) != null) ? true : false;
 		}catch (IOException e){
 			sendCommandText(Key.WARNING + " " + "there's nothing to read here!");
-			shutDown();
 		}
 		return valid;
 
@@ -132,7 +121,7 @@ public class ClientHandler extends Thread{
 				currentStone = playersInGame.get(name).getStone();
 			}	
 		}catch(NullPointerException e){
-			server.print("no game found!");
+			server.print(Key.END + " " + "no game found!");
 			shutDown();
 		}
 	}
@@ -162,12 +151,13 @@ public class ClientHandler extends Thread{
 					check.keyWaiting(validInput, this);
 					break;
 				case CHAT:
-					check.keyChat(validInput, server);
+					check.keyChat(validInput, server,this);
 					break;
 				case CANCEL:
 					check.keyCancel(name, server, this);
 					break;
 				case MOVE:
+					server.sendToPairedClients(Key.CHAT + " Currentstone = " + currentStone, this,server);
 					check.keyMove(splited[1], splited[2], currentStone, server, this);
 					break;
 				case TABLEFLIP:
@@ -186,9 +176,9 @@ public class ClientHandler extends Thread{
 			}
 		}catch(IllegalArgumentException e){
 			sendCommandText(Key.WARNING + " " + "use the right keywords and arguments!");
-			server.print(" clientHandler.run shutdown");	
+			run();	
 		}
-		shutDown();
+		
 	}
 
 }

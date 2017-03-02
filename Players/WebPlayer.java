@@ -16,6 +16,7 @@ public class WebPlayer extends Player{
 	private int x;
 	private int y;
 	private Status status;
+	private String statusString;
 	private Strategy strategy;
 
 	/**
@@ -26,6 +27,7 @@ public class WebPlayer extends Player{
 	 */
 	public WebPlayer(String name, Status status, int boardSize){
 		super(name, status, boardSize);
+		
 		this.strategy = new FillBoardStrategy();
 
 	}
@@ -65,14 +67,9 @@ public class WebPlayer extends Player{
 			}catch (NumberFormatException e){
 				System.out.println("2nd and 3rd inputs should be integers");
 			}
-			if(board.isValidMove(x,y)){
+			if(board.isValidMove(x,y,statusString)){
 				System.out.println("you made a move");
-				if(status.equals(Status.BLACK)){
-					board.isBlack = true;
-				}else{
-					board.isBlack = false;
-				}
-				board.setStone(board.getPointAt(x, y));
+				board.setStone(board.getPointAt(x, y),statusString);
 				s = (Key.MOVE + " " + x + " " + y);
 				return s;
 					//break;

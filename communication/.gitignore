@@ -6,3 +6,7 @@
 /ClientHandler$Key.class
 /ClientHandler.class
 /KeyConvertor.class
+/keyBoardInput.class
+/ThreadTurnBase.class
+/ThreadConnected.class
+/ThreadKeyBoardInput.class

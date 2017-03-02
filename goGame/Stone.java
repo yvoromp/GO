@@ -5,7 +5,6 @@ import goGame.Board.Status;
 
 public class Stone {
 
-	public StoneChain chain;
 	public Status status;
 	public int liberties;
 	public int x;
@@ -20,7 +19,6 @@ public class Stone {
 	 * @param s
 	 */
 	public Stone(int x, int y, Status s){
-		chain = null;
 		this.x = x;
 		this.y = y;
 		liberties = 4;
